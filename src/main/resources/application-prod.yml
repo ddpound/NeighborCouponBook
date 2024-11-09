@@ -1,0 +1,24 @@
+server:
+  port: 7001
+  servlet:
+    encoding:
+      force-response: true
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://127.0.0.1:5432/coupon_book?charSet=UTF-8&currentSchema=public
+    username: coupon_user_1
+    password: 1234
+    #password: 1234
+  thymeleaf:
+    cache: false
+
+  # spring data jpa ??
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+  application:
+    name: NeighborhoodCouponBook

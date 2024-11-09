@@ -1,0 +1,37 @@
+server:
+  port: 9999
+  servlet:
+    encoding:
+      force-response: true
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://127.0.0.1:5432/coupon_book?charSet=UTF-8&currentSchema=public
+    username: postgres
+    password: 1234
+  thymeleaf:
+    cache: false
+
+  # spring data jpa ??
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+  application:
+    name: NeighborhoodCouponBook
+
+
+jwt:
+  jwt-password: 10120*32teat12491024u1209481204981204912840192ur0192ru0129ru10r9u12r091ur019r2u120r9u120r912u
+  expiration-hours: 3
+  issuer: youseong-coupon
+  default-user-password: 1
+
+admin-setting:
+  super-admin-id: 1
+  super-admin-login-id: superAdmin
+  super-admin-pw: 1234
+  super-admin-role-name: super-admin
+  super-admin-role-id: 1
