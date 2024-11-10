@@ -3,6 +3,7 @@ package com.neighborcouponbook.service;
 import com.neighborcouponbook.model.CouponUser;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
+import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.http.ResponseEntity;
@@ -55,4 +56,11 @@ public interface CouponUserService {
     BooleanBuilder settingCouponUserSearchBuilder(CouponUserSearch search);
 
     JPAQuery<CouponUser> selectCouponUserQuery(CouponUserSearch search);
+
+
+    /**
+     * UserRole table과 join select 문
+     *
+     * */
+    List<CouponUserWithUserRole> selectCouponUserQueryJoinUserRole(CouponUserSearch search);
 }

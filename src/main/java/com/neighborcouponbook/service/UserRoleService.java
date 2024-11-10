@@ -2,7 +2,9 @@ package com.neighborcouponbook.service;
 
 
 import com.neighborcouponbook.model.UserRole;
+import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.search.UserRoleSearch;
+import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
 import com.neighborcouponbook.model.vo.UserRoleVo;
 
 import java.util.List;

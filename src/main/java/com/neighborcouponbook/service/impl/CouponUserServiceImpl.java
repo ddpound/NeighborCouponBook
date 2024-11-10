@@ -5,9 +5,12 @@ import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.common.util.NullChecker;
 import com.neighborcouponbook.model.CouponUser;
 import com.neighborcouponbook.model.QCouponUser;
+import com.neighborcouponbook.model.QUserRole;
 import com.neighborcouponbook.model.UserRole;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
+import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
+import com.neighborcouponbook.model.vo.UserRoleVo;
 import com.neighborcouponbook.repository.CouponUserRepository;
 import com.neighborcouponbook.service.CouponUserService;
 import com.neighborcouponbook.service.UserRoleService;
@@ -170,6 +173,40 @@ public class CouponUserServiceImpl implements CouponUserService {
                 .select(qCouponUser)
                 .from(qCouponUser)
                 .where(settingCouponUserSearchBuilder(search));
+    }
+
+    @Override
+    public List<CouponUserWithUserRole> selectCouponUserQueryJoinUserRole(CouponUserSearch search) {
+        try {
+            List<CouponUserWithUserRole> resultList = new ArrayList<>();
+
+            QCouponUser qCouponUser = QCouponUser.couponUser;
+            QUserRole qUserRole = QUserRole.userRole;
+
+            List<Tuple> result = queryFactory
+                    .select(qCouponUser,qUserRole)
+                    .from(qCouponUser)
+                    .join(qUserRole).on(qCouponUser.userId.eq(qUserRole.userId))
+                    .where(settingCouponUserSearchBuilder(search)).fetch();
+
+            for (Tuple tuple : result) {
+                CouponUser couponUser = tuple.get(qCouponUser);
+                UserRole userRoleResult = tuple.get(qUserRole);
+
+
+                CouponUserWithUserRole couponUserWithUserRole = new CouponUserWithUserRole();
+                couponUserWithUserRole.setCouponUserVo(new CouponUserVo().convertToVo(couponUser));
+                couponUserWithUserRole.setUserRoleVo(new UserRoleVo().convertToUserRoleVo(userRoleResult));
+
+                resultList.add(couponUserWithUserRole);
+            }
+            System.out.println("결과값 도출");
+            System.out.println(resultList);
+            return resultList;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

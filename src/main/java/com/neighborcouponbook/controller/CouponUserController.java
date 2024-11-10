@@ -5,6 +5,7 @@ import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
+import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
 import com.neighborcouponbook.service.CouponUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -57,12 +58,20 @@ public class CouponUserController {
     /**
      * @return userData와 권한 및 관련된 데이터를 모두 가져옴
      * */
-    @GetMapping(value = "get/all-data")
+    @GetMapping(value = "get/my-all-data")
     public ResponseEntity<?> getUserAllData(CouponUserSearch search) {
 
-        /**
-         * TODO : OneToMany 등의 조건을 걸어서 자동 JOIN 걸 예정.
-         * */
+        List<CouponUserWithUserRole> selectUserWithUserRoleList =
+                couponUserService.selectCouponUserQueryJoinUserRole(search);
+
+        if(selectUserWithUserRoleList != null && !selectUserWithUserRoleList.isEmpty()) {
+            return ResponseUtil.createResponse(
+                    selectUserWithUserRoleList,
+                    1,
+                    "리스트 반환 완료",
+                    HttpStatus.OK
+            );
+        }
 
         return ResponseUtil.createSuccessResponse(-1, "데이터가 없습니다");
     }
