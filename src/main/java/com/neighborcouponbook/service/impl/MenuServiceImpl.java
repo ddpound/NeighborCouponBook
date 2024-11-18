@@ -117,6 +117,7 @@ public class MenuServiceImpl implements MenuService {
         return queryFactory
                 .select(menu)
                 .from(menu)
-                .where(settingMenuSearchBuilder(menuSearch));
+                .where(settingMenuSearchBuilder(menuSearch))
+                .orderBy(menu.menuId.desc());
     }
 }

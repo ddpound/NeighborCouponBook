@@ -23,6 +23,9 @@ public class CommonColumnVo {
     private String remarks;
     private String dbRemarks;
 
+    // 해당 vo list 결과값의 총 개수
+    private Long totalCount;
+
     /**
      * DB 공통 컬럼을 그대로 vo 로 전환해줌
      * */
