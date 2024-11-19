@@ -13,6 +13,9 @@ public interface MenuService {
 
     List<MenuVo> selectMenuList(MenuSearch menuSearch);
 
+    /** 메뉴 리스트 카운트 */
+    Long selectMenuTotalCount(MenuSearch menuSearch);
+
     ResponseEntity<?> createMenu(Menu menu);
 
     ResponseEntity<?> createMenu(MenuVo menuVo);
@@ -24,5 +27,7 @@ public interface MenuService {
     BooleanBuilder settingMenuSearchBuilder(MenuSearch menuSearch);
 
     JPAQuery<Menu> selectMenuListQuery(MenuSearch menuSearch);
+
+    JPAQuery<Long> selectMenuListCountQuery(MenuSearch menuSearch);
 
 }

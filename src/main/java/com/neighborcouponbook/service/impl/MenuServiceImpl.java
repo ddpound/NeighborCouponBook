@@ -41,6 +41,12 @@ public class MenuServiceImpl implements MenuService {
         return menuVo.convertToMenuVoList(resultList);
     }
 
+    @Override
+    public Long selectMenuTotalCount(MenuSearch menuSearch) {
+        settingMenuSearchBuilder(menuSearch);
+        return selectMenuListCountQuery(menuSearch).fetchCount();
+    }
+
     @Transactional
     @Override
     public ResponseEntity<?> createMenu(Menu menu) {
@@ -119,5 +125,15 @@ public class MenuServiceImpl implements MenuService {
                 .from(menu)
                 .where(settingMenuSearchBuilder(menuSearch))
                 .orderBy(menu.menuId.desc());
+    }
+
+    @Override
+    public JPAQuery<Long> selectMenuListCountQuery(MenuSearch menuSearch) {
+        QMenu menu = QMenu.menu;
+
+        return queryFactory
+                .select(menu.count())
+                .from(menu)
+                .where(settingMenuSearchBuilder(menuSearch));
     }
 }

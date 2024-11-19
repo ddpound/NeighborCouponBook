@@ -5,19 +5,21 @@ import org.springframework.http.ResponseEntity;
 
 public class ResponseUtil {
 
-    /**
-     * 데이터 반환 예시
-     * */
-    public static <T> ResponseEntity<ApiResponse<T>> createResponse(T data, Integer state, String message, HttpStatus status) {
-        ApiResponse<T> apiResponse = new ApiResponse<>(data, state, message);
+
+    public static <T> ResponseEntity<ApiResponse<T>> createResponse(T data, ResponseMetaData metaData ,Integer state, String message, HttpStatus status) {
+        ApiResponse<T> apiResponse = new ApiResponse<>(data, metaData, state, message);
         return new ResponseEntity<>(apiResponse, status);
     }
 
-    /**
-     * 성공응답 반환
-     * */
+
+    public static <T> ResponseEntity<ApiResponse<T>> createResponse(T data, Integer state, String message, HttpStatus status) {
+        ApiResponse<T> apiResponse = new ApiResponse<>(data,null, state, message);
+        return new ResponseEntity<>(apiResponse, status);
+    }
+
+
     public static ResponseEntity<ApiResponse<String>> createSuccessResponse(Integer state, String message) {
-        ApiResponse<String> apiResponse = new ApiResponse<>("", state, message);
+        ApiResponse<String> apiResponse = new ApiResponse<>("", null , state, message);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class ApiResponse<T> {
     private T data;
+    private ResponseMetaData metaData;
     private Integer state;
     private String message;
 }
