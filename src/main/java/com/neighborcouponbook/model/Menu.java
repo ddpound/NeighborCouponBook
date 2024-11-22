@@ -1,11 +1,15 @@
 package com.neighborcouponbook.model;
 
 import com.neighborcouponbook.common.util.NullChecker;
+import com.neighborcouponbook.model.vo.MenuVo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 메뉴 테이블은 트리 계층구조를 가진다.

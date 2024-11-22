@@ -20,6 +20,8 @@ public interface MenuService {
 
     ResponseEntity<?> createMenu(MenuVo menuVo);
 
+    ResponseEntity<?> createMenu(List<MenuVo> menuVoList);
+
     ResponseEntity<?> updateMenu(Menu menu);
 
     Integer softDelteMenu(Menu menu);

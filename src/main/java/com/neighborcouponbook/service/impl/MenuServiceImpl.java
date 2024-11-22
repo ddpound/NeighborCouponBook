@@ -14,10 +14,15 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.JDBCException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +39,6 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public List<MenuVo> selectMenuList(MenuSearch menuSearch) {
 
-        settingMenuSearchBuilder(menuSearch);
         List<Menu> resultList = selectMenuListQuery(menuSearch).fetch();
 
         MenuVo menuVo = new MenuVo();
@@ -43,8 +47,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public Long selectMenuTotalCount(MenuSearch menuSearch) {
-        settingMenuSearchBuilder(menuSearch);
-        return selectMenuListCountQuery(menuSearch).fetchCount();
+        return selectMenuListCountQuery(menuSearch).fetchOne();
     }
 
     @Transactional
@@ -54,7 +57,9 @@ public class MenuServiceImpl implements MenuService {
             menuRepository.save(menu);
 
             return ResponseUtil.createSuccessResponse(1,"메뉴 저장이 완료되었습니다.");
-        }catch (Exception e){
+        } catch (ConstraintViolationException e) {
+            return ResponseUtil.createSuccessResponse(-1,"동일한 데이터를 입력했습니다.");
+        } catch (Exception e){
             return ResponseUtil.createSuccessResponse(-1,"메뉴 저장이 실패했습니다. : " + e.getMessage());
         }
     }
@@ -68,13 +73,48 @@ public class MenuServiceImpl implements MenuService {
 
            Menu createMenu = new Menu();
            createMenu.createMenu(menuVo.getMenuUri(), menuVo.getMenuName(), menuVo.getParentMenuId());
+
+           /** todo null 방지 코드 추가할 것. */
            createMenu.settingCreateData(AuthUtil.getLoginUserData().getUserId());
+
            menuRepository.save(createMenu);
 
            return ResponseUtil.createSuccessResponse(1 , "메뉴 저장이 완료 되었습니다");
        }catch (Exception e){
            return ResponseUtil.createSuccessResponse(-1,"메뉴 저장이 실패했습니다. : " + e.getMessage());
        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResponseEntity<?> createMenu(List<MenuVo> menuVoList) {
+
+        try {
+            if(menuVoList != null && !menuVoList.isEmpty()){
+                List<Menu> menus = new ArrayList<>();
+
+                for(MenuVo menuVo : menuVoList){
+                    if(menuVo == null || menuVo.getMenuName() == null || menuVo.getMenuUri() == null)
+                        return ResponseUtil.createSuccessResponse(-1,"메뉴 이름이나 uri 가 비어있습니다. ");
+
+                    Menu createMenu = new Menu();
+                    createMenu.createMenu(menuVo.getMenuUri(), menuVo.getMenuName(), menuVo.getParentMenuId());
+
+                    /** todo null 방지 코드 추가할 것. */
+                    createMenu.settingCreateData(AuthUtil.getLoginUserData().getUserId());
+
+                    menus.add(createMenu);
+                }
+
+                menuRepository.saveAll(menus);
+            }else{
+                throw new Exception();
+            }
+
+            return ResponseUtil.createSuccessResponse(1 , "메뉴 저장이 완료 되었습니다");
+        }catch (Exception e){
+            return ResponseUtil.createSuccessResponse(-1,"메뉴 저장이 실패했습니다. : " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -124,6 +164,8 @@ public class MenuServiceImpl implements MenuService {
                 .select(menu)
                 .from(menu)
                 .where(settingMenuSearchBuilder(menuSearch))
+                .offset(menuSearch.getOffset())
+                .limit(menuSearch.getPageSize())
                 .orderBy(menu.menuId.desc());
     }
 

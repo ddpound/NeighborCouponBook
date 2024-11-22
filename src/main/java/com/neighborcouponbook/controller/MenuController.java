@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @apiNote  menu 생성, 삭제, 업데이트를 담당하는 컨트롤러단
  */
@@ -35,5 +37,10 @@ public class MenuController {
     @PostMapping(value = "create")
     public ResponseEntity<?> createMenu(@RequestBody MenuVo menuVo) {
         return menuService.createMenu(menuVo);
+    }
+
+    @PostMapping(value = "create-menu-list")
+    public ResponseEntity<?> createMenuList(@RequestBody List<MenuVo> menuVoList) {
+        return menuService.createMenu(menuVoList);
     }
 }
