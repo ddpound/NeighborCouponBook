@@ -194,7 +194,7 @@ public class MenuServiceImpl implements MenuService {
                     ? menu.menuName.asc() : menu.menuName.desc();
             case menuUri -> menuSearch.getSortOrder().equals(CommonSearch.orderBy.asc)
                     ? menu.menuUri.asc() : menu.menuUri.desc();
-            default -> null; // 예외 처리 가능
+            default -> null; // 예외 시 null 반환
         };
     }
 
