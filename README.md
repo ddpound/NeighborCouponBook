@@ -1,5 +1,8 @@
 # 우리동네 쿠폰북 PROJECT 
-# (My neighborhood coupon book)
+# (My neighbor coupon book)
+
+## 문서 이동
+- [코드 가이드 문서](docs/code-guide.md)
 
 ### 설명
 1. 초단기 미니프로젝트

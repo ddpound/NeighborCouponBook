@@ -5,23 +5,22 @@ import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.common.util.NullChecker;
 import com.neighborcouponbook.model.Menu;
 import com.neighborcouponbook.model.QMenu;
+import com.neighborcouponbook.model.search.CommonSearch;
 import com.neighborcouponbook.model.search.MenuSearch;
 import com.neighborcouponbook.model.vo.MenuVo;
 import com.neighborcouponbook.repository.MenuRepository;
 import com.neighborcouponbook.service.MenuService;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.JDBCException;
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -160,13 +159,42 @@ public class MenuServiceImpl implements MenuService {
     public JPAQuery<Menu> selectMenuListQuery(MenuSearch menuSearch) {
         QMenu menu = QMenu.menu;
 
-        return queryFactory
+        JPAQuery<Menu> returnJpaQuery = queryFactory
                 .select(menu)
                 .from(menu)
                 .where(settingMenuSearchBuilder(menuSearch))
                 .offset(menuSearch.getOffset())
-                .limit(menuSearch.getPageSize())
-                .orderBy(menu.menuId.desc());
+                .limit(menuSearch.getPageSize());
+
+        // 정렬 조건 추가
+        returnJpaQuery = applySorting(returnJpaQuery, menuSearch, menu);
+
+        return returnJpaQuery;
+    }
+
+    private JPAQuery<Menu> applySorting(JPAQuery<Menu> query, MenuSearch menuSearch, QMenu menu) {
+        if (menuSearch.getSort() == null || menuSearch.getSortOrder() == null) {
+            return query; // 정렬 조건이 없으면 그대로 반환
+        }
+
+        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(menuSearch, menu);
+        if (orderSpecifier != null) {
+            query = query.orderBy(orderSpecifier);
+        }
+
+        return query;
+    }
+
+    private OrderSpecifier<?> getOrderSpecifier(MenuSearch menuSearch, QMenu menu) {
+        return switch (menuSearch.getSort()) {
+            case menuId -> menuSearch.getSortOrder().equals(CommonSearch.orderBy.asc)
+                    ? menu.menuId.asc() : menu.menuId.desc();
+            case menuName -> menuSearch.getSortOrder().equals(CommonSearch.orderBy.asc)
+                    ? menu.menuName.asc() : menu.menuName.desc();
+            case menuUri -> menuSearch.getSortOrder().equals(CommonSearch.orderBy.asc)
+                    ? menu.menuUri.asc() : menu.menuUri.desc();
+            default -> null; // 예외 처리 가능
+        };
     }
 
     @Override

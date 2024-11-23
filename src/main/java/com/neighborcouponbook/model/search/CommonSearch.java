@@ -35,10 +35,10 @@ public class CommonSearch {
     public Long getOffset() {
         long returnOffset;
 
-        if(getPageNumber() > 1L){
+        if(getPageNumber() > 0L){
             returnOffset = (getPageNumber() - 1L) * getPageSize();
         }else{
-            returnOffset = 1L;
+            returnOffset = 0L;
         }
 
         return returnOffset;

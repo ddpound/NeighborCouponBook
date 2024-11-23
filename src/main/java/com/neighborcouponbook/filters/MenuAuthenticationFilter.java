@@ -44,6 +44,9 @@ public class MenuAuthenticationFilter implements Filter {
     @Value("${admin-setting.super-admin-role-id}")
     private Long superAdminRoleId;
 
+    @Value("${filter-setting.menu-auth-filter}")
+    private String menuAuthFilter;
+
     /**
      * user select
      * */
@@ -98,19 +101,21 @@ public class MenuAuthenticationFilter implements Filter {
             // 토큰 검증, 에러 발생시 403
             Claims tokenClaims = jwtService.validateTokenAndGetSubject(token);
 
+            if(menuAuthFilter.equals("true")){
+                // auth로 시작하면 통과
+                if(uri.toString().startsWith("/auth") || Long.parseLong(tokenClaims.get("role_id").toString()) == superAdminRoleId){
+                    filterChain.doFilter(servletRequest, servletResponse);
+                }else{
+                    MenuRoleSearch menuRoleSearch = MenuRoleSearch.builder().roleId(Long.parseLong(tokenClaims.get("role_id").toString())).build();
+                    List<MenuRoleVo> menuRoleVoList = menuRoleService.selectMenuRoleVoList(menuRoleSearch);
+                    log.info("menu role list : {} ", menuRoleVoList);
 
-            // auth로 시작하면 통과
-            if(uri.toString().startsWith("/auth") || Long.parseLong(tokenClaims.get("role_id").toString()) == superAdminRoleId){
-                filterChain.doFilter(servletRequest, servletResponse);
+
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다.");
+                }
             }else{
-                MenuRoleSearch menuRoleSearch = MenuRoleSearch.builder().roleId(Long.parseLong(tokenClaims.get("role_id").toString())).build();
-                List<MenuRoleVo> menuRoleVoList = menuRoleService.selectMenuRoleVoList(menuRoleSearch);
-                log.info("menu role list : {} ", menuRoleVoList);
-
-
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다.");
+                filterChain.doFilter(servletRequest, servletResponse);
             }
-
         }catch (Exception e) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다. : " + e.getMessage());
         }

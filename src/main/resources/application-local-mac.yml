@@ -34,3 +34,7 @@ admin-setting:
   super-admin-pw: 1234
   super-admin-role-name: super-admin
   super-admin-role-id: 1
+
+# 운영에 배포 할 때에는 꼭 true 로 진행
+filter-setting:
+  menu-auth-filter: true
