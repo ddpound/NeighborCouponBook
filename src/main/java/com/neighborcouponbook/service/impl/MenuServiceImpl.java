@@ -185,6 +185,7 @@ public class MenuServiceImpl implements MenuService {
         return query;
     }
 
+    /** todo 정렬은 나중에 복수로 받을 수 있음. 수정요망. */
     private OrderSpecifier<?> getOrderSpecifier(MenuSearch menuSearch, QMenu menu) {
         return switch (menuSearch.getSort()) {
             case menuId -> menuSearch.getSortOrder().equals(CommonSearch.orderBy.asc)
