@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -56,21 +57,28 @@ public class CouponUserController {
 
 
     /**
+     * 로그인 되어있는 내 계정의 데이터만을 가져옴
      * @return userData와 권한 및 관련된 데이터를 모두 가져옴
      * */
-    @GetMapping(value = "get/my-all-data")
+    @GetMapping(value = "get/my-data")
     public ResponseEntity<?> getUserAllData(CouponUserSearch search) {
 
-        List<CouponUserWithUserRole> selectUserWithUserRoleList =
-                couponUserService.selectCouponUserQueryJoinUserRole(search);
+        Long nowLoginId = Objects.requireNonNull(AuthUtil.getLoginUserData()).getUserId();
 
-        if(selectUserWithUserRoleList != null && !selectUserWithUserRoleList.isEmpty()) {
-            return ResponseUtil.createResponse(
-                    selectUserWithUserRoleList,
-                    1,
-                    "리스트 반환 완료",
-                    HttpStatus.OK
-            );
+        if(nowLoginId != null) {
+            search.setUserId(nowLoginId);
+
+            List<CouponUserWithUserRole> selectUserWithUserRoleList =
+                    couponUserService.selectCouponUserQueryJoinUserRole(search);
+
+            if(selectUserWithUserRoleList != null && !selectUserWithUserRoleList.isEmpty()) {
+                return ResponseUtil.createResponse(
+                        selectUserWithUserRoleList,
+                        1,
+                        "리스트 반환 완료",
+                        HttpStatus.OK
+                );
+            }
         }
 
         return ResponseUtil.createSuccessResponse(-1, "데이터가 없습니다");

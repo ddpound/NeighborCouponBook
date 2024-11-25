@@ -38,7 +38,7 @@ public class LoginServiceImpl implements LoginService {
     @Transactional(readOnly = true)
     public ResponseEntity<?> login(CouponUserVo userVo) {
 
-        log.info("try login data : {}", userVo);
+        log.info("try userLoginId : {}", userVo.getUserLoginId());
 
         if(NullChecker.isNull(userVo) || NullChecker.isNull(userVo.getUserLoginId()) || NullChecker.isNull(userVo.getPassword()))
             return ResponseUtil.createResponse(null, -1,"비밀번호나 패스워드를 입력해주세요.", HttpStatus.OK);

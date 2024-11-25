@@ -13,6 +13,8 @@ public interface MenuService {
 
     List<MenuVo> selectMenuList(MenuSearch menuSearch);
 
+    ResponseEntity<?> responseSelectMenuList(MenuSearch menuSearch);
+
     /** 메뉴 리스트 카운트 */
     Long selectMenuTotalCount(MenuSearch menuSearch);
 

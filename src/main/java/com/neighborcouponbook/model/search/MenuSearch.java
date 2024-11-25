@@ -13,12 +13,12 @@ public class MenuSearch extends CommonSearch{
     private Long menuId;
     private String menuUri;
     private String menuName;
-    private menuOrderBy sort;
+    private MenuOrderBy sort;
 
     /**
      * order by에 사용될 enum
      * */
-    public enum menuOrderBy {
+    public enum MenuOrderBy {
         menuId, menuUri, menuName
     }
 }

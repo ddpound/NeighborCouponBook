@@ -60,7 +60,9 @@ public interface CouponUserService {
 
     /**
      * UserRole table과 join select 문
-     *
      * */
     List<CouponUserWithUserRole> selectCouponUserQueryJoinUserRole(CouponUserSearch search);
+    Long selectCouponUserQueryJoinUserRoleTotalCount(CouponUserSearch search);
+
+    ResponseEntity<?> responseSelectCouponUserQueryJoinUserRole(CouponUserSearch search);
 }

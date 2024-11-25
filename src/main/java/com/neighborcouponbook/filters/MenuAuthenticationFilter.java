@@ -70,9 +70,17 @@ public class MenuAuthenticationFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         try {
+            // 요청 IP 주소 가져오기
+            String clientIp = request.getRemoteAddr();
+            String xForwardedForHeader = request.getHeader("X-Forwarded-For");
+            if (xForwardedForHeader != null) {
+                clientIp = xForwardedForHeader.split(",")[0].trim();
+            }
+            log.info("Client IP: {}", clientIp);
+
             // URI 추출 및 권한 확인 로직
             String requestUri = ((HttpServletRequest) servletRequest).getRequestURI();
-            log.info("Request URI in custom filter : {} ", requestUri);
+            log.info("Request URI : {} ", requestUri);
             StringBuilder uri = new StringBuilder(requestUri);
 
             if(uri.toString().startsWith("http")) {

@@ -1,5 +1,6 @@
 package com.neighborcouponbook.service.impl;
 
+import com.neighborcouponbook.common.response.ResponseMetaData;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.common.util.NullChecker;
@@ -17,6 +18,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +44,25 @@ public class MenuServiceImpl implements MenuService {
 
         MenuVo menuVo = new MenuVo();
         return menuVo.convertToMenuVoList(resultList);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ResponseEntity<?> responseSelectMenuList(MenuSearch menuSearch) {
+
+        List<Menu> resultList = selectMenuListQuery(menuSearch).fetch();
+
+        MenuVo menuVo = new MenuVo();
+        List<MenuVo> menuVoList = menuVo.convertToMenuVoList(resultList);
+        Long menuListTotalCount = selectMenuTotalCount(menuSearch);
+
+        return ResponseUtil
+                .createResponse(
+                        menuVoList,
+                        ResponseMetaData.builder().dataTotalCount(menuListTotalCount).build(),
+                        1,
+                        "메뉴 리스트 반환에 성공했습니다.",
+                        HttpStatus.OK);
     }
 
     @Override
@@ -188,17 +209,16 @@ public class MenuServiceImpl implements MenuService {
     /** todo 정렬은 나중에 복수로 받을 수 있음. 수정요망. */
     private OrderSpecifier<?> getOrderSpecifier(MenuSearch menuSearch, QMenu menu) {
         return switch (menuSearch.getSort()) {
-            case menuId -> menuSearch.getSortOrder().equals(CommonSearch.orderBy.asc)
+            case menuId -> menuSearch.getSortOrder().equals(CommonSearch.OrderBy.asc)
                     ? menu.menuId.asc() : menu.menuId.desc();
-            case menuName -> menuSearch.getSortOrder().equals(CommonSearch.orderBy.asc)
+            case menuName -> menuSearch.getSortOrder().equals(CommonSearch.OrderBy.asc)
                     ? menu.menuName.asc() : menu.menuName.desc();
-            case menuUri -> menuSearch.getSortOrder().equals(CommonSearch.orderBy.asc)
+            case menuUri -> menuSearch.getSortOrder().equals(CommonSearch.OrderBy.asc)
                     ? menu.menuUri.asc() : menu.menuUri.desc();
             default -> null; // 예외 시 null 반환
         };
     }
 
-    // testcommit
     @Override
     public JPAQuery<Long> selectMenuListCountQuery(MenuSearch menuSearch) {
         QMenu menu = QMenu.menu;

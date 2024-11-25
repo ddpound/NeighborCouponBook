@@ -1,7 +1,6 @@
 package com.neighborcouponbook.model.search;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -27,7 +26,7 @@ public class CommonSearch {
     private Boolean paging;
 
     // 오름차순 내림차순 정렬, 기본 오름차순 정렬
-    private orderBy sortOrder = orderBy.asc;
+    private OrderBy sortOrder = OrderBy.asc;
 
     /**
      * pageSize 와 pageNumber, 그리고 리스트의 길이를 이용해 offset 시작위치를 계산해줌.
@@ -44,7 +43,7 @@ public class CommonSearch {
         return returnOffset;
     }
 
-    public enum orderBy{
+    public enum OrderBy {
         desc, asc
     }
 }

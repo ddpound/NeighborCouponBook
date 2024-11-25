@@ -35,9 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
-        logger.info("jwt filter action");
-
         String token = RequestTokenUtil.parseBearerToken(request);
 
         // 값이 없다면 쿠키값도 한번더 체크
@@ -47,7 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if(token != null) {
-            logger.info("token Sensing");
             Claims tokenClaims = jwtService.validateTokenAndGetSubject(token); // 토큰 검증, 에러 발생시 403
 
             if(tokenClaims != null) {
@@ -64,6 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
+                logger.info("request user id : " + tokenClaims.get("user_id").toString());
             }
         }
 

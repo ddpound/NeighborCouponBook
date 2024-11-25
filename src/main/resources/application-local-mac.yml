@@ -22,6 +22,7 @@ spring:
   application:
     name: NeighborhoodCouponBook
 
+# custom setting
 jwt:
   jwt-password: 10120*32teat12491024u1209481204981204912840192ur0192ru0129ru10r9u12r091ur019r2u120r9u120r912u
   expiration-hours: 3
@@ -38,3 +39,4 @@ admin-setting:
 # 운영에 배포 할 때에는 꼭 true 로 진행
 filter-setting:
   menu-auth-filter: true
+

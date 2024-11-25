@@ -25,13 +25,7 @@ public class MenuController {
 
     @GetMapping(value = "list")
     public ResponseEntity<?> selectMenuList(MenuSearch search){
-
-        return ResponseUtil
-                .createResponse(
-                        menuService.selectMenuList(search),
-                        1,
-                        "메뉴 리스트 반환에 성공했습니다.",
-                        HttpStatus.OK);
+        return menuService.responseSelectMenuList(search);
     }
 
     @PostMapping(value = "create")

@@ -1,5 +1,7 @@
 package com.neighborcouponbook.service.impl;
 
+import com.neighborcouponbook.common.response.ApiResponse;
+import com.neighborcouponbook.common.response.ResponseMetaData;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.common.util.NullChecker;
@@ -7,6 +9,7 @@ import com.neighborcouponbook.model.CouponUser;
 import com.neighborcouponbook.model.QCouponUser;
 import com.neighborcouponbook.model.QUserRole;
 import com.neighborcouponbook.model.UserRole;
+import com.neighborcouponbook.model.search.CommonSearch;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
@@ -16,10 +19,12 @@ import com.neighborcouponbook.service.CouponUserService;
 import com.neighborcouponbook.service.UserRoleService;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,7 +80,13 @@ public class CouponUserServiceImpl implements CouponUserService {
     public ResponseEntity<?> joinCouponUser(CouponUserVo couponUserVo) {
         try {
             ResponseEntity<?> validationData = couponUserVoValidation(couponUserVo);
-            if(validationData != null) return validationData;
+            if(validationData != null) {
+                ApiResponse<?> apiResponse = (ApiResponse<?>) validationData.getBody();
+                log.info("USER JOIN -> validation check message : {}", apiResponse.getMessage());
+                return validationData;
+            }
+
+            couponUserVo.setDbRemarks("회원가입으로 생성된 유저");
 
             // 초기 회원가입 데이터라 security context에 담긴 값이 없음.
             CouponUser complteUser = couponUserRepository
@@ -84,6 +95,8 @@ public class CouponUserServiceImpl implements CouponUserService {
             // 먼저 권한을 가져온다. 초기 유저 생성시 권한은 일반 유저다. 2가 일반유저 아이디
             UserRole createUserRole = new UserRole();
             createUserRole.createUserRole(complteUser.getUserId(), 2L);
+            createUserRole.settingCreateData(complteUser.getUserId());
+            createUserRole.writeRemarks("회원가입으로 생성된 유저 권한 데이터");
             userRoleService.saveUserRole(createUserRole);
 
             return ResponseUtil.createSuccessResponse(1, "저장에 성공했습니다.");
@@ -95,7 +108,7 @@ public class CouponUserServiceImpl implements CouponUserService {
     @Override
     public ResponseEntity<?> couponUserVoValidation(CouponUserVo couponUserVo) {
         if(couponUserVo.getUserLoginId() == null) return ResponseUtil.createSuccessResponse(-1, "입력 로그인 아이디가 없습니다.");
-        if(couponUserVo.getUserName() == null) return ResponseUtil.createSuccessResponse(-1, "유저 이름이 없습니다.");
+        if(couponUserVo.getUserName() == null || couponUserVo.getUserName().isEmpty()) return ResponseUtil.createSuccessResponse(-1, "유저 이름이 없습니다.");
         if(loginIdDuplicateCheck(couponUserVo)) return ResponseUtil.createSuccessResponse(-1, "이미 있는 로그인 아이디 입니다.");
 
         return null;
@@ -183,16 +196,19 @@ public class CouponUserServiceImpl implements CouponUserService {
             QCouponUser qCouponUser = QCouponUser.couponUser;
             QUserRole qUserRole = QUserRole.userRole;
 
-            List<Tuple> result = queryFactory
+            JPAQuery<Tuple> result = queryFactory
                     .select(qCouponUser,qUserRole)
                     .from(qCouponUser)
                     .join(qUserRole).on(qCouponUser.userId.eq(qUserRole.userId))
-                    .where(settingCouponUserSearchBuilder(search)).fetch();
+                    .where(settingCouponUserSearchBuilder(search))
+                    .offset(search.getOffset())
+                    .limit(search.getPageSize());
 
-            for (Tuple tuple : result) {
+            result = applySorting(result, search, qCouponUser);
+
+            for (Tuple tuple : result.fetch()) {
                 CouponUser couponUser = tuple.get(qCouponUser);
                 UserRole userRoleResult = tuple.get(qUserRole);
-
 
                 CouponUserWithUserRole couponUserWithUserRole = new CouponUserWithUserRole();
                 couponUserWithUserRole.setCouponUserVo(new CouponUserVo().convertToVo(couponUser));
@@ -200,12 +216,70 @@ public class CouponUserServiceImpl implements CouponUserService {
 
                 resultList.add(couponUserWithUserRole);
             }
-            System.out.println("결과값 도출");
-            System.out.println(resultList);
+
             return resultList;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
+        }
+    }
+
+    private JPAQuery<Tuple> applySorting(JPAQuery<Tuple> query, CouponUserSearch couponUserSearch, QCouponUser qCouponUser) {
+        if(couponUserSearch.getSort() == null || couponUserSearch.getSortOrder() == null) return query;
+
+        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(couponUserSearch, qCouponUser);
+        if (orderSpecifier != null) {
+            query = query.orderBy(orderSpecifier);
+        }
+
+        return query;
+    }
+
+    private OrderSpecifier<?> getOrderSpecifier(CouponUserSearch couponUserSearch, QCouponUser qCouponUser) {
+        return switch (couponUserSearch.getSort()){
+            case userId -> couponUserSearch.getSortOrder().equals(CommonSearch.OrderBy.asc) ? qCouponUser.userId.asc() : qCouponUser.userId.desc();
+            case userLoginId -> couponUserSearch.getSortOrder().equals(CommonSearch.OrderBy.asc) ? qCouponUser.userLoginId.asc() : qCouponUser.userLoginId.desc();
+            case userName -> couponUserSearch.getSortOrder().equals(CommonSearch.OrderBy.asc) ? qCouponUser.userName.asc() : qCouponUser.userName.desc();
+        };
+    }
+
+    @Override
+    public Long selectCouponUserQueryJoinUserRoleTotalCount(CouponUserSearch search) {
+
+        QCouponUser qCouponUser = QCouponUser.couponUser;
+        QUserRole qUserRole = QUserRole.userRole;
+
+        return queryFactory
+                .select(qCouponUser.count())
+                .from(qCouponUser)
+                .join(qUserRole).on(qCouponUser.userId.eq(qUserRole.userId))
+                .where(settingCouponUserSearchBuilder(search))
+                .fetchOne();
+    }
+
+    @Override
+    public ResponseEntity<?> responseSelectCouponUserQueryJoinUserRole(CouponUserSearch search) {
+        try {
+            List<CouponUserWithUserRole> resultList = selectCouponUserQueryJoinUserRole(search);
+            Long totalCount = selectCouponUserQueryJoinUserRoleTotalCount(search);
+
+            return ResponseUtil.createResponse(
+                    resultList,
+                    ResponseMetaData.builder().dataTotalCount(totalCount).build(),
+                    1,
+                    "어드민 유저 리스트 반환 완료",
+                    HttpStatus.OK
+            );
+        } catch (Exception e) {
+            log.error(e.getMessage());
+
+            return ResponseUtil.createResponse(
+                    null,
+                    ResponseMetaData.builder().dataDescription(e.getMessage()).build(),
+                    -1,
+                    "에러 발생",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
