@@ -1,15 +1,15 @@
 package com.neighborcouponbook.model.search;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class MenuRoleSearch {
+public class MenuRoleSearch extends CommonSearch{
     private Long menuRoleId;
     private Long menuId;
     private Long roleId;

@@ -3,9 +3,12 @@ package com.neighborcouponbook.filters;
 import com.neighborcouponbook.common.service.JwtService;
 import com.neighborcouponbook.common.util.RequestTokenUtil;
 import com.neighborcouponbook.model.search.MenuRoleSearch;
+import com.neighborcouponbook.model.search.MenuSearch;
 import com.neighborcouponbook.model.vo.MenuRoleVo;
+import com.neighborcouponbook.model.vo.MenuVo;
 import com.neighborcouponbook.service.CouponUserService;
 import com.neighborcouponbook.service.MenuRoleService;
+import com.neighborcouponbook.service.MenuService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,14 +50,10 @@ public class MenuAuthenticationFilter implements Filter {
     @Value("${filter-setting.menu-auth-filter}")
     private String menuAuthFilter;
 
-    /**
-     * user select
-     * */
     private final CouponUserService couponUserService;
 
-    /**
-     * 메뉴권한 확인
-     * */
+    private final MenuService menuService;
+
     private final MenuRoleService menuRoleService;
 
     private final JwtService jwtService;
@@ -78,7 +77,10 @@ public class MenuAuthenticationFilter implements Filter {
             }
             log.info("Client IP: {}", clientIp);
 
-            // URI 추출 및 권한 확인 로직
+            /**
+             * URI 추출 및 권한 확인 로직
+             * method 확인
+             * */
             String requestUri = ((HttpServletRequest) servletRequest).getRequestURI();
             log.info("Request URI : {} ", requestUri);
             StringBuilder uri = new StringBuilder(requestUri);
@@ -114,18 +116,59 @@ public class MenuAuthenticationFilter implements Filter {
                 if(uri.toString().startsWith("/auth") || Long.parseLong(tokenClaims.get("role_id").toString()) == superAdminRoleId){
                     filterChain.doFilter(servletRequest, servletResponse);
                 }else{
-                    MenuRoleSearch menuRoleSearch = MenuRoleSearch.builder().roleId(Long.parseLong(tokenClaims.get("role_id").toString())).build();
-                    List<MenuRoleVo> menuRoleVoList = menuRoleService.selectMenuRoleVoList(menuRoleSearch);
-                    log.info("menu role list : {} ", menuRoleVoList);
+                    MenuSearch menuSearch = MenuSearch.builder().menuUri(requestUri.trim()).pageNumber(1L).pageSize(10L).build();
+                    List<MenuVo> menuVoList = menuService.selectMenuList(menuSearch);
+                    log.info("menu role list : {} ", menuVoList);
+                    if(menuVoList != null && !menuVoList.isEmpty()){
+                        // menu uri 는 중복이 불가능함.
+                        MenuRoleSearch menuRoleSearch = MenuRoleSearch
+                                .builder()
+                                .menuId(menuVoList.get(0).getMenuId())
+                                .roleId(Long.parseLong(tokenClaims.get("role_id").toString()))
+                                .build();
+                        List<MenuRoleVo> menuRoleVoList = menuRoleService.selectMenuRoleVoList(menuRoleSearch);
+                        log.info("menu role list : {} ", menuRoleVoList);
+
+                        // 권한 체크 시작
+                        // HTTP 메서드 확인 (GET, POST, PUT, DELETE 등)
+                        String method = request.getMethod().toLowerCase();
+                        if(menuRoleVoList != null && !menuRoleVoList.isEmpty()){
+                            boolean result = false;
+                            switch (method){
+                                case "get":
+                                    if (menuRoleVoList.get(0).getRead()){
+                                        result = true;
+                                    }
+                                    break;
+                                case "post", "delete", "put":
+                                    if (menuRoleVoList.get(0).getWrite()){
+                                        result = true;
+                                    }
+                                    break;
+                            }
+
+                            log.info("result : {}, {} ", result, method);
+                            if(result){
+                                filterChain.doFilter(servletRequest, servletResponse);
+                            }else{
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "메뉴에 관련된 권한이 없습니다.");
+                            }
+
+                        }else{
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "메뉴에 관련된 권한이 없습니다.");
+                        }
 
 
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다.");
+                    }else{
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN, "등록된 메뉴가 없습니다.");
+                    }
                 }
             }else{
                 filterChain.doFilter(servletRequest, servletResponse);
             }
         }catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다. : " + e.getMessage());
+            log.error(e.getMessage());
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "에러가 발생했습니다.");
         }
     }
 }

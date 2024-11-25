@@ -156,7 +156,6 @@ public class MenuRoleServiceImpl implements MenuRoleService {
 
     @Override
     public List<MenuRoleVo> selectMenuRoleVoList(MenuRoleSearch menuRoleSearch) {
-        settingMenuRoleBuilder(menuRoleSearch);
 
         return new MenuRoleVo()
                 .convertToVoList(
@@ -166,7 +165,6 @@ public class MenuRoleServiceImpl implements MenuRoleService {
 
     @Override
     public List<MenuRole> selectMenuRoleList(MenuRoleSearch menuRoleSearch) {
-        settingMenuRoleBuilder(menuRoleSearch);
 
         return selectMenuRoleQuery(menuRoleSearch).fetch();
     }
@@ -189,7 +187,7 @@ public class MenuRoleServiceImpl implements MenuRoleService {
             builder.and(QMenuRole.menuRole.menuRoleId.eq(menuRoleSearch.getMenuRoleId()));
 
         if(!NullChecker.isNull(menuRoleSearch.getMenuId()))
-            builder.and(QMenuRole.menuRole.menuId.eq(menuRoleSearch.getRoleId()));
+            builder.and(QMenuRole.menuRole.menuId.eq(menuRoleSearch.getMenuId()));
 
         if(!NullChecker.isNull(menuRoleSearch.getRoleId()))
             builder.and(QMenuRole.menuRole.roleId.eq(menuRoleSearch.getRoleId()));
