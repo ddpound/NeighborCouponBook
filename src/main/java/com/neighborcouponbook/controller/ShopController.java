@@ -1,14 +1,14 @@
 package com.neighborcouponbook.controller;
 
+import com.neighborcouponbook.model.Shop;
 import com.neighborcouponbook.model.vo.ShopVo;
 import com.neighborcouponbook.service.ShopService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -27,4 +27,12 @@ public class ShopController {
         return shopService.createShop(shopVo);
     }
 
+    @PostMapping(value = "update")
+    public ResponseEntity<?> updateShop(@RequestParam(value = "id") Long shopId, @RequestBody ShopVo shopVo) { return shopService.updateShop(shopId, shopVo); }
+
+    @PostMapping(value = "delete")
+    public ResponseEntity<?> deleteShop(@RequestParam(value = "id") Long shopId, @RequestBody ShopVo shopVo) { return shopService.deleteShop(shopId, shopVo); }
+
+    @GetMapping(value = "shops")
+    public List<ShopVo> selectShopListOfUser(@RequestParam(value = "id") Long userId) { return shopService.selectShopList(userId); };
 }

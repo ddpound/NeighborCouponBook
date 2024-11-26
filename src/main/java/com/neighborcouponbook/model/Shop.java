@@ -18,14 +18,14 @@ public class Shop extends CommonColumn{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long shopId;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String shopName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private CouponUser couponUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_type_id")
     private ShopType shopType;
 
@@ -42,4 +42,19 @@ public class Shop extends CommonColumn{
         this.businessRegistrationNumber = businessRegistrationNumber;
         this.shopDescription = shopDescription;
     }
+
+    //일단 상점 이름, 업종 등 변경불가
+    public void updateShop(String shopAddress, String businessRegistrationNumber, String shopDescription) {
+        if (shopAddress != null) {
+            this.shopAddress = shopAddress;
+        }
+        if (businessRegistrationNumber != null) {
+            this.businessRegistrationNumber = businessRegistrationNumber;
+        }
+        if (shopDescription != null) {
+            this.shopDescription = shopDescription;
+        }
+    }
+
+
 }
