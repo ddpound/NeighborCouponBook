@@ -40,3 +40,8 @@ admin-setting:
 filter-setting:
   menu-auth-filter: true
 
+menu:
+  cache:
+    enabled: true
+    size: 1000
+

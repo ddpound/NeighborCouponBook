@@ -20,6 +20,8 @@ public class MenuVo extends CommonColumnVo{
     private String menuUri;
     private String menuName;
     private Long parentMenuId;
+    private Menu.MenuType menuType = Menu.MenuType.REST;
+    private Menu.MenuProperty menuProperty = Menu.MenuProperty.STATIC;
 
     public MenuVo convertToMenuVo(Menu menu) {
         MenuVo menuVo = new MenuVo();
@@ -30,6 +32,9 @@ public class MenuVo extends CommonColumnVo{
         if(!NullChecker.isNull(menu.getParentMenuId())) menuVo.setParentMenuId(menu.getParentMenuId());
 
         if(!NullChecker.isNull(menu.returnAllCommonColumn())) menuVo.settingCommonColumnVo(menu.returnAllCommonColumn());
+
+        if(!NullChecker.isNull(menu.getMenuType())) menuVo.setMenuType(menu.getMenuType());
+        if(!NullChecker.isNull(menu.getMenuProperty())) menuVo.setMenuProperty(menu.getMenuProperty());
 
         return menuVo;
     }

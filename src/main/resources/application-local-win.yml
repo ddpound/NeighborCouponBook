@@ -39,3 +39,8 @@ admin-setting:
 # 운영에 배포 할 때에는 꼭 true 로 진행
 filter-setting:
   menu-auth-filter: true
+
+menu:
+  cache:
+    enabled: true
+    size: 1000

@@ -36,6 +36,12 @@ public class MenuServiceImpl implements MenuService {
 
     private final JPAQueryFactory queryFactory;
 
+    @Override
+    public List<MenuVo> selectAllMenus() {
+        List<Menu> allList = menuRepository.findAll();
+        return MenuVo.builder().build().convertToMenuVoList(allList);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public List<MenuVo> selectMenuList(MenuSearch menuSearch) {

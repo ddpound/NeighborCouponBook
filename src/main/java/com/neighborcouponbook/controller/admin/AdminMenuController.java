@@ -2,6 +2,7 @@ package com.neighborcouponbook.controller.admin;
 
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.model.search.MenuSearch;
+import com.neighborcouponbook.service.MenuAuthorizationService;
 import com.neighborcouponbook.service.MenuRoleService;
 import com.neighborcouponbook.service.MenuService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class AdminMenuController {
 
     private final MenuService menuService;
     private final MenuRoleService menuRoleService;
+    private final MenuAuthorizationService menuAuthorizationService;
 
 
     @GetMapping(value = "get/menu-list")
@@ -34,6 +36,15 @@ public class AdminMenuController {
                 1,
                 "메뉴 반환에 성공했습니다.",
                 HttpStatus.OK);
+    }
+
+    @GetMapping(value = "cache/refresh")
+    public ResponseEntity<?> refreshCache() {
+        int result = menuAuthorizationService.refreshCache();
+
+        String message = result == 1 ? "메뉴 캐싱에 성공햇습니다." : "캐싱에 실패했습니다.";
+
+        return ResponseUtil.createResponse(null, result, message, HttpStatus.OK);
     }
 
 

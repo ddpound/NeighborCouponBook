@@ -34,9 +34,21 @@ public class Menu extends CommonColumn{
 
     private Long parentMenuId;
 
+    private MenuType menuType = MenuType.REST;
+
+    private MenuProperty menuProperty = MenuProperty.STATIC;
+
     public void createMenu(String menuUri, String menuName, Long parentMenuId) {
         this.menuUri = menuUri;
         this.menuName = menuName;
+        if(!NullChecker.isNull(parentMenuId)) this.parentMenuId = parentMenuId;
+    }
+
+    public void createMenu(String menuUri, String menuName, Long parentMenuId, MenuType menuType, MenuProperty menuProperty) {
+        this.menuUri = menuUri;
+        this.menuName = menuName;
+        this.menuType = menuType;
+        this.menuProperty = menuProperty;
         if(!NullChecker.isNull(parentMenuId)) this.parentMenuId = parentMenuId;
     }
 
@@ -44,6 +56,21 @@ public class Menu extends CommonColumn{
         if(!NullChecker.isNullString(menu.getMenuUri())) this.menuUri = menu.getMenuUri();
         if(!NullChecker.isNullString(menu.getMenuName())) this.menuName = menu.getMenuName();
         if(!NullChecker.isNull(menu.getParentMenuId())) this.parentMenuId = menu.getParentMenuId();
+        if(!NullChecker.isNull(menu.getMenuType())) this.menuType = menu.getMenuType();
+        if(!NullChecker.isNull(menu.getMenuProperty())) this.menuProperty = menu.getMenuProperty();
+    }
+
+    public enum MenuType {
+        REST, PAGE
+    }
+
+    /**
+     * 메뉴 속성
+     * 1. DYNAMIC : 동적 URI, /my-data/{param}
+     * 2. STATIC : 정적 URI, /my-data/all-list
+     * */
+    public enum MenuProperty{
+        DYNAMIC, STATIC
     }
 
 }

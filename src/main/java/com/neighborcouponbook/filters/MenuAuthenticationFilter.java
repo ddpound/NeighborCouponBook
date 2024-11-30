@@ -1,5 +1,7 @@
 package com.neighborcouponbook.filters;
 
+import com.neighborcouponbook.common.components.AuthorizationResult;
+import com.neighborcouponbook.common.context.RequestContext;
 import com.neighborcouponbook.common.service.JwtService;
 import com.neighborcouponbook.common.util.RequestTokenUtil;
 import com.neighborcouponbook.model.search.MenuRoleSearch;
@@ -7,6 +9,7 @@ import com.neighborcouponbook.model.search.MenuSearch;
 import com.neighborcouponbook.model.vo.MenuRoleVo;
 import com.neighborcouponbook.model.vo.MenuVo;
 import com.neighborcouponbook.service.CouponUserService;
+import com.neighborcouponbook.service.MenuAuthorizationService;
 import com.neighborcouponbook.service.MenuRoleService;
 import com.neighborcouponbook.service.MenuService;
 import io.jsonwebtoken.Claims;
@@ -58,6 +61,8 @@ public class MenuAuthenticationFilter implements Filter {
 
     private final JwtService jwtService;
 
+    private final MenuAuthorizationService menuAuthorizationService;
+
     /**
      * 권한 체크 필터, 모든 권한을 체크해준다.
      * 1. super-admin 이면 권한 체크를 하지 않고 넘어간다.
@@ -108,63 +113,25 @@ public class MenuAuthenticationFilter implements Filter {
                 token = RequestTokenUtil.parseBearerTokenCookies(request);
             }
 
-            // 토큰 검증, 에러 발생시 403
-            Claims tokenClaims = jwtService.validateTokenAndGetSubject(token);
+            // HTTP 메서드 확인 (GET, POST, PUT, DELETE 등)
+            String method = request.getMethod().toLowerCase();
 
-            if(menuAuthFilter.equals("true")){
-                // auth로 시작하면 통과
-                if(uri.toString().startsWith("/auth") || Long.parseLong(tokenClaims.get("role_id").toString()) == superAdminRoleId){
-                    filterChain.doFilter(servletRequest, servletResponse);
-                }else{
-                    MenuSearch menuSearch = MenuSearch.builder().menuUri(requestUri.trim()).pageNumber(1L).pageSize(10L).build();
-                    List<MenuVo> menuVoList = menuService.selectMenuList(menuSearch);
-                    log.info("menu role list : {} ", menuVoList);
-                    if(menuVoList != null && !menuVoList.isEmpty()){
-                        // menu uri 는 중복이 불가능함.
-                        MenuRoleSearch menuRoleSearch = MenuRoleSearch
-                                .builder()
-                                .menuId(menuVoList.get(0).getMenuId())
-                                .roleId(Long.parseLong(tokenClaims.get("role_id").toString()))
-                                .build();
-                        List<MenuRoleVo> menuRoleVoList = menuRoleService.selectMenuRoleVoList(menuRoleSearch);
-                        log.info("menu role list : {} ", menuRoleVoList);
+            RequestContext requestContext = RequestContext.builder()
+                    .clientIp(clientIp)
+                    .requestUri(requestUri)
+                    .token(token)
+                    .method(method)
+                    .build();
 
-                        // 권한 체크 시작
-                        // HTTP 메서드 확인 (GET, POST, PUT, DELETE 등)
-                        String method = request.getMethod().toLowerCase();
-                        if(menuRoleVoList != null && !menuRoleVoList.isEmpty()){
-                            boolean result = false;
-                            switch (method){
-                                case "get":
-                                    if (menuRoleVoList.get(0).getRead()){
-                                        result = true;
-                                    }
-                                    break;
-                                case "post", "delete", "put":
-                                    if (menuRoleVoList.get(0).getWrite()){
-                                        result = true;
-                                    }
-                                    break;
-                            }
+            AuthorizationResult result = menuAuthorizationService.authorize(requestContext);
 
-                            log.info("result : {}, {} ", result, method);
-                            if(result){
-                                filterChain.doFilter(servletRequest, servletResponse);
-                            }else{
-                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "메뉴에 관련된 권한이 없습니다.");
-                            }
-
-                        }else{
-                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "메뉴에 관련된 권한이 없습니다.");
-                        }
-
-
-                    }else{
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN, "등록된 메뉴가 없습니다.");
-                    }
-                }
-            }else{
-                filterChain.doFilter(servletRequest, servletResponse);
+            if (result.isAuthorized()) {
+                filterChain.doFilter(request, response);
+            } else {
+                // 권한이 없는 경우 401 응답
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"" + result.getErrorMessage() + "\"}");
             }
         }catch (Exception e) {
             log.error(e.getMessage());
