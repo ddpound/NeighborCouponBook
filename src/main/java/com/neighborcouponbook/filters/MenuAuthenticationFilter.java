@@ -100,6 +100,7 @@ public class MenuAuthenticationFilter extends OncePerRequestFilter {
                 if (result.isAuthorized()) {
                     filterChain.doFilter(request, response);
                 } else {
+                    log.info("권한 획득 실패 : {}", result.getErrorMessage());
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json;charset=UTF-8");
                     response.getWriter().write(ResponseUtil.responseEntityMapperString(null,null,-1,result.getErrorMessage(), HttpStatus.FORBIDDEN));
@@ -109,7 +110,6 @@ public class MenuAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write(ResponseUtil.responseEntityMapperString(null,null,-1, "에러가 발생했습니다.", HttpStatus.FORBIDDEN));
@@ -125,8 +125,9 @@ public class MenuAuthenticationFilter extends OncePerRequestFilter {
                 "/auth/test/welcome",
                 "/auth/test/user/lubid",
                 "/public/file/**",
-                "/swagger-ui/**",
-                "/v3/api-docs/**"
+                "/swagger-ui",
+                "/api-docs",
+                "/swagger-ui.html"
         };
 
         String path = request.getRequestURI();

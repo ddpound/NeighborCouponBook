@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests ->
                         requests.requestMatchers("/auth/**", "/public/**", "/error/**").permitAll()  // 인증이 필요 없는 경로
                                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()  // 정적 파일 경로 허용
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()  // swagger 접근 권한 허용
+                                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()  // swagger 접근 권한 허용
                                 .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)  // JWT 필터 추가

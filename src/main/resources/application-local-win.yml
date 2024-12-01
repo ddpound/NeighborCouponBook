@@ -46,13 +46,15 @@ menu:
 
 
 springdoc:
-  swagger-ui:
-    path: /swagger-ui.html  # Swagger UI 경로 설정
-    groups-order: DESC
-    operationsSorter: method
-    disable-swagger-default-url: true
-  api-docs:
-    path: /api-docs  # API 문서 경로 설정
-  show-actuator: false  # actuator endpoint 표시 여부
+  packages-to-scan: com.neighborcouponbook.controller  # 실제 컨트롤러가 있는 패키지 경로
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    display-request-duration: true
+    operations-sorter: alpha
+  api-docs:
+    path: /api-docs
+  cache:
+    disabled: true

@@ -1,7 +1,7 @@
 package com.neighborcouponbook.controller;
 
 
-import com.neighborcouponbook.common.annotation.MenuAuth;
+import com.neighborcouponbook.common.annotation.MenuInformation;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.model.search.CouponUserSearch;
@@ -76,10 +76,10 @@ public class CouponUserController {
                     )
             }
     )
-
-    @MenuAuth(menuAuthDetail = {
-                    @MenuAuth.MenuAuthDetail(rolesName = "super-admin", roleId = 1),
-                    @MenuAuth.MenuAuthDetail(rolesName = "user", roleId = 2)
+    @MenuInformation(
+            menuAuthDetail = {
+                    @MenuInformation.MenuRoleDetail(rolesName = "super-admin", roleId = 1),
+                    @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
     })
     @GetMapping(value = "get/my-data")
     public ResponseEntity<?> getUserAllData(CouponUserSearch search) {
