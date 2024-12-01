@@ -37,6 +37,10 @@ public class QMenu extends EntityPathBase<Menu> {
 
     public final StringPath menuName = createString("menuName");
 
+    public final EnumPath<Menu.MenuProperty> menuProperty = createEnum("menuProperty", Menu.MenuProperty.class);
+
+    public final EnumPath<Menu.MenuType> menuType = createEnum("menuType", Menu.MenuType.class);
+
     public final StringPath menuUri = createString("menuUri");
 
     public final NumberPath<Long> parentMenuId = createNumber("parentMenuId", Long.class);

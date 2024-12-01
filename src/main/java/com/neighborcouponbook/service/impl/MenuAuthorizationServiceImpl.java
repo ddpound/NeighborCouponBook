@@ -18,6 +18,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Cacheable;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -103,36 +104,41 @@ public class MenuAuthorizationServiceImpl implements MenuAuthorizationService {
      * @return 권한 검사 결과
      */
     private AuthorizationResult checkMenuAuthorization(RequestContext context, Long roleId) {
-        // 캐시 사용 여부에 따라 메뉴 정보 조회 방식 결정
-        Optional<List<MenuVo>> menuOpt = cacheEnabled
-                ? menuCache.get(context.getRequestUri())  // 캐시에서 조회
-                : loadMenu(context.getRequestUri());      // DB에서 직접 조회
 
-        // 쿼리스트링 제거 된 문자열
-        String removeRequestUri = removeQueryParameters(context.getRequestUri());
+        try {
+            // 캐시 사용 여부에 따라 메뉴 정보 조회 방식 결정
+            Optional<List<MenuVo>> menuOpt = cacheEnabled
+                    ? menuCache.get(context.getRequestUri())  // 캐시에서 조회
+                    : loadMenu(context.getRequestUri());      // DB에서 직접 조회
 
-        // list static, dynamic 구분 리스트
-        if(menuOpt.isPresent()) {
-            List<MenuVo> menus = searchFilteringMenuList(menuOpt.get(),removeRequestUri);
+            // 쿼리스트링 제거 된 문자열
+            String removeRequestUri = removeQueryParameters(context.getRequestUri());
 
+            // list static, dynamic 구분 리스트
+            if(menuOpt.isPresent() && !menuOpt.get().isEmpty()) {
+                List<MenuVo> menus = searchFilteringMenuList(menuOpt.get(),removeRequestUri);
 
-            if(menus == null) return AuthorizationResult.denied("No matching menu found");
-            if(menus.size() > 1) return AuthorizationResult.denied("Multiple matching menus found");
+                if(menus == null) return AuthorizationResult.denied("매칭되는 메뉴가 없습니다.");
+                if(menus.size() > 1) return AuthorizationResult.denied("메뉴 매칭이 여러개 입니다.");
 
-            MenuRoleVo menuRole = menuRoleService.selectMenuRole(
-                    MenuRoleSearch.builder()
-                            .menuId(menus.get(0).getMenuId())
-                            .roleId(roleId)
-                            .build());
+                MenuRoleVo menuRole = menuRoleService.selectMenuRole(
+                        MenuRoleSearch.builder()
+                                .menuId(menus.get(0).getMenuId())
+                                .roleId(roleId)
+                                .build());
 
-            if (menuRole == null) {
-                return AuthorizationResult.denied("No menu role found");  // 권한 없음
+                if (menuRole == null) {
+                    return AuthorizationResult.denied("등록된 권한이 없습니다.");  // 권한 없음
+                }
+
+                // HTTP 메서드에 따른 권한 확인
+                return checkMethodPermission(context.getMethod(), menuRole);
+            }else{
+                return AuthorizationResult.denied("등록된 메뉴가 없습니다.");  // 메뉴를 찾을 수 없음.
             }
-
-            // HTTP 메서드에 따른 권한 확인
-            return checkMethodPermission(context.getMethod(), menuRole);
-        }else{
-            return AuthorizationResult.denied("not fount menu list");  // 메뉴를 찾을 수 없음.
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return AuthorizationResult.denied("error");  // 메뉴를 찾을 수 없음.
         }
     }
 
