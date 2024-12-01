@@ -35,31 +35,8 @@ import java.util.List;
 @Component
 public class MenuAuthenticationFilter implements Filter {
 
-    @Value("${admin-setting.super-admin-id}")
-    private Long superAdminId;
-
-    @Value("${admin-setting.super-admin-login-id}")
-    private String superAdminLoginId;
-
-    @Value("${admin-setting.super-admin-pw}")
-    private String superAdminPassword;
-
-    @Value("${admin-setting.super-admin-role-name}")
-    private String superAdminRoleName;
-
-    @Value("${admin-setting.super-admin-role-id}")
-    private Long superAdminRoleId;
-
     @Value("${filter-setting.menu-auth-filter}")
-    private String menuAuthFilter;
-
-    private final CouponUserService couponUserService;
-
-    private final MenuService menuService;
-
-    private final MenuRoleService menuRoleService;
-
-    private final JwtService jwtService;
+    private boolean menuAuthFilter;
 
     private final MenuAuthorizationService menuAuthorizationService;
 
@@ -123,15 +100,19 @@ public class MenuAuthenticationFilter implements Filter {
                     .method(method)
                     .build();
 
-            AuthorizationResult result = menuAuthorizationService.authorize(requestContext);
+            if(menuAuthFilter) {
+                AuthorizationResult result = menuAuthorizationService.authorize(requestContext);
 
-            if (result.isAuthorized()) {
+                if (result.isAuthorized()) {
+                    filterChain.doFilter(request, response);
+                } else {
+                    // 권한이 없는 경우 401 응답
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"" + result.getErrorMessage() + "\"}");
+                }
+            }else{
                 filterChain.doFilter(request, response);
-            } else {
-                // 권한이 없는 경우 401 응답
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"" + result.getErrorMessage() + "\"}");
             }
         }catch (Exception e) {
             log.error(e.getMessage());
