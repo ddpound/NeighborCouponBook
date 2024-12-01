@@ -4,6 +4,11 @@
 
 
 ### 각 항목 별 페이징 처리
+
+이런식으로 클라이언트가 어떤걸 정렬하고 오름차순,내림차순을 선택할 수 있도록 하기위해   
+코드는 아래와 같이 짰습니다.   
+예시 : /menu/list?sort=menuId&sortOrder=desc
+
 ```java
 
 private final MenuRepository menuRepository;
@@ -51,8 +56,6 @@ private OrderSpecifier<?> getOrderSpecifier(MenuSearch menuSearch, QMenu menu) {
     };
 }
 ```
-
-프론트 유저들은 asc, desc 옵션과, 어떤 것을 정렬할지 선택할 수 있습니다.
 
 
 
