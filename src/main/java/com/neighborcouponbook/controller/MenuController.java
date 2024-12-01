@@ -33,6 +33,7 @@ public class MenuController {
         return menuService.createMenu(menuVo);
     }
 
+
     @PostMapping(value = "create-menu-list")
     public ResponseEntity<?> createMenuList(@RequestBody List<MenuVo> menuVoList) {
         return menuService.createMenu(menuVoList);

@@ -78,7 +78,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 "/auth/user/join",
                 "/auth/test/welcome",
                 "/auth/test/user/lubid",
-                "/public/file/**"
+                "/public/file/**",
+                "/swagger-ui/**",
+                "/v3/api-docs/**"
         };
 
         String path = request.getRequestURI();

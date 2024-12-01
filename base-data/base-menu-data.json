@@ -1,0 +1,28 @@
+{
+  "menuRoleVoList": [
+    {
+      "menuId" : 1,
+      "roleId" : 2,
+      "read" : true,
+      "upload" : true,
+      "write" : true,
+      "download" : true
+    },
+    {
+      "menuId" : 2,
+      "roleId" : 2,
+      "read" : true,
+      "upload" : true,
+      "write" : true,
+      "download" : true
+    },
+    {
+      "menuId" : 3,
+      "roleId" : 2,
+      "read" : true,
+      "upload" : true,
+      "write" : true,
+      "download" : true
+    }
+  ]
+}

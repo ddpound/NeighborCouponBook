@@ -1,12 +1,17 @@
 package com.neighborcouponbook.controller;
 
 
+import com.neighborcouponbook.common.annotation.MenuAuth;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
 import com.neighborcouponbook.service.CouponUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -56,10 +61,26 @@ public class CouponUserController {
     }
 
 
-    /**
-     * 로그인 되어있는 내 계정의 데이터만을 가져옴
-     * @return userData와 권한 및 관련된 데이터를 모두 가져옴
-     * */
+    @Operation(
+            summary = "내 유저 정보 데이터 가져오기",
+            description = "내 유저 정보와 권한 정보를 모두 가져옵니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            content = @Content(schema = @Schema(implementation = CouponUserWithUserRole.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러"
+                    )
+            }
+    )
+
+    @MenuAuth(menuAuthDetail = {
+                    @MenuAuth.MenuAuthDetail(rolesName = "super-admin", roleId = 1),
+                    @MenuAuth.MenuAuthDetail(rolesName = "user", roleId = 2)
+    })
     @GetMapping(value = "get/my-data")
     public ResponseEntity<?> getUserAllData(CouponUserSearch search) {
 

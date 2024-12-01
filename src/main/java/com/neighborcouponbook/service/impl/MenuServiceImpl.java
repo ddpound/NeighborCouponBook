@@ -101,13 +101,14 @@ public class MenuServiceImpl implements MenuService {
            createMenu.createMenu(menuVo.getMenuUri(), menuVo.getMenuName(), menuVo.getParentMenuId());
 
            /** todo null 방지 코드 추가할 것. */
-           createMenu.settingCreateData(AuthUtil.getLoginUserData().getUserId());
+           createMenu.settingCreateData(AuthUtil.getLoginUserId() != null ? AuthUtil.getLoginUserId() : 1L);
 
-           menuRepository.save(createMenu);
+           Menu newMenu = menuRepository.save(createMenu);
 
-           return ResponseUtil.createSuccessResponse(1 , "메뉴 저장이 완료 되었습니다");
+           return ResponseUtil.createResponse(newMenu,1,"메뉴 저장이 완료 되었습니다", HttpStatus.OK);
        }catch (Exception e){
-           return ResponseUtil.createSuccessResponse(-1,"메뉴 저장이 실패했습니다. : " + e.getMessage());
+           log.error(e);
+           return ResponseUtil.createSuccessResponse(-1,"메뉴 저장이 실패했습니다. : ");
        }
     }
 

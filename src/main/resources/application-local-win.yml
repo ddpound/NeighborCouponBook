@@ -36,11 +36,23 @@ admin-setting:
   super-admin-role-name: super-admin
   super-admin-role-id: 1
 
-# 운영에 배포 할 때에는 꼭 true 로 진행
-filter-setting:
-  menu-auth-filter: true
-
 menu:
+  # 운영에 배포 할 때에는 꼭 true 로 진행
+  filter-setting:
+    menu-auth-filter: true
   cache:
     enabled: true
     size: 1000
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI 경로 설정
+    groups-order: DESC
+    operationsSorter: method
+    disable-swagger-default-url: true
+  api-docs:
+    path: /api-docs  # API 문서 경로 설정
+  show-actuator: false  # actuator endpoint 표시 여부
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

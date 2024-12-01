@@ -40,12 +40,13 @@ public class MenuRoleServiceImpl implements MenuRoleService {
             MenuRole saveMenuRole = new MenuRole();
 
             saveMenuRole.createMenuRole(menuRoleVo);
-            saveMenuRole.settingCreateData(AuthUtil.getLoginUserData().getUserId());
+            saveMenuRole.settingCreateData(AuthUtil.getLoginUserId() != null ? AuthUtil.getLoginUserId() : 1L);
 
             menuRoleRepository.save(saveMenuRole);
             return ResponseUtil.createSuccessResponse(1,  "저장에 성공했습니다.");
         }catch (Exception e) {
-            return ResponseUtil.createSuccessResponse(-1,  "저장에 실패했습니다 : " + e.getMessage());
+            log.error(e);
+            return ResponseUtil.createSuccessResponse(-1,  "저장에 실패했습니다 : ");
         }
     }
 
@@ -146,12 +147,17 @@ public class MenuRoleServiceImpl implements MenuRoleService {
 
     @Override
     public MenuRoleVo selectMenuRole(MenuRoleSearch menuRoleSearch) {
-        settingMenuRoleBuilder(menuRoleSearch);
+        try {
+            settingMenuRoleBuilder(menuRoleSearch);
 
-        return new MenuRoleVo().convertToVo(
-                        Objects.requireNonNull(selectMenuRoleQuery(menuRoleSearch)
-                                .fetchOne())
-        );
+            return new MenuRoleVo().convertToVo(
+                    Objects.requireNonNull(selectMenuRoleQuery(menuRoleSearch)
+                            .fetchOne())
+            );
+        }catch (Exception e) {
+            log.error(e);
+            return null;
+        }
     }
 
     @Override

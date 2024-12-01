@@ -1,25 +1,32 @@
 package com.neighborcouponbook.config.init;
 
+import com.neighborcouponbook.common.annotation.MenuAuth;
+import com.neighborcouponbook.common.components.AuthorizationResult;
+import com.neighborcouponbook.common.response.ApiResponse;
 import com.neighborcouponbook.model.CouponUser;
+import com.neighborcouponbook.model.Menu;
 import com.neighborcouponbook.model.Role;
 import com.neighborcouponbook.model.UserRole;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.search.RoleSearch;
 import com.neighborcouponbook.model.search.UserRoleSearch;
-import com.neighborcouponbook.model.vo.CouponUserVo;
-import com.neighborcouponbook.model.vo.RoleVo;
-import com.neighborcouponbook.model.vo.UserRoleVo;
+import com.neighborcouponbook.model.vo.*;
 import com.neighborcouponbook.repository.UserRoleRepository;
-import com.neighborcouponbook.service.CouponUserService;
-import com.neighborcouponbook.service.RoleService;
-import com.neighborcouponbook.service.UserRoleService;
+import com.neighborcouponbook.service.*;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 앱 초기 실행시 생성되는 데이터
@@ -47,11 +54,19 @@ public class InitSystem implements CommandLineRunner {
     @Value("${admin-setting.super-admin-role-id}")
     private Long superAdminRoleId;
 
+    private final RequestMappingHandlerMapping handlerMapping;
+
     private final CouponUserService couponUserService;
 
     private final RoleService roleService;
 
     private final UserRoleService userRoleService;
+
+    private final MenuService menuService;
+
+    private final MenuAuthorizationService menuAuthorizationService;
+
+    private final MenuRoleService menuRoleService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -60,6 +75,9 @@ public class InitSystem implements CommandLineRunner {
         createSuperAdminUserRole();
 
         createUserRole();
+
+        // 엔드포인트에 등록된 메뉴 추가
+        createBaseMenuList();
     }
 
     public void createSuperAdmin() {
@@ -133,5 +151,77 @@ public class InitSystem implements CommandLineRunner {
 
             userRoleService.saveUserRole(superAdminUserRole);
         }
+    }
+
+    public void createBaseMenuList(){
+        // 모든 엔드포인트 매핑 정보 가져오기
+        Map<RequestMappingInfo, HandlerMethod> mappings = handlerMapping.getHandlerMethods();
+        List<MenuVo> allMenu = menuService.selectAllMenus();
+
+        mappings.forEach((mappingInfo, handlerMethod) -> {
+            // Swagger Operation 어노테이션 정보 가져오기
+            Operation operation = handlerMethod.getMethodAnnotation(Operation.class);
+            MenuAuth menuAuth = handlerMethod.getMethod().getAnnotation(MenuAuth.class);
+
+            String description;
+            String name;
+
+            if (operation != null) {
+                description = operation.description();
+                name = operation.summary();
+            } else {
+                name = "";
+                description = "";
+            }
+
+            // URL 패턴 가져오기
+            Set<String> patterns = mappingInfo.getPatternValues();
+
+            patterns.forEach(pattern -> {
+                MenuVo menu = MenuVo.builder()
+                        .menuUri(pattern)
+                        .menuName(name.isEmpty() ? pattern : name) // 적절한 메뉴 이름 설정 필요
+                        .menuProperty(pattern.contains("{") ? Menu.MenuProperty.DYNAMIC : Menu.MenuProperty.STATIC)
+                        .dbRemarks(description.isEmpty() ? "초기 세팅 메뉴 리스트" : description)
+                        .build();
+
+                ApiResponse<?> returnRespone = null;
+
+                // list static, dynamic 구분 리스트
+                if(allMenu != null && !allMenu.isEmpty()) {
+                    List<MenuVo> menus = menuAuthorizationService.searchFilteringMenuList(allMenu, pattern);
+
+                    // menu가 존재 하지 않을때만 저장
+                    if (menus == null) {
+                        returnRespone = (ApiResponse<?>) menuService.createMenu(menu).getBody();
+                        allMenu.add(menu);
+                    }
+                }else{
+                    returnRespone = (ApiResponse<?>) menuService.createMenu(menu).getBody();
+                    allMenu.add(menu);
+                }
+
+                Menu newMenu = returnRespone != null && returnRespone.getData() != null ? (Menu) returnRespone.getData() : null;
+
+                // 메뉴 추가가 완료되었으면 메뉴에 해당된 권한도 추가.
+                // 메뉴가 올바르게 저장되어야함.
+                if(menuAuth != null && menuAuth.menuAuthDetail() != null && menuAuth.menuAuthDetail().length > 0 && newMenu != null) {
+                    // 메뉴 등록 추가
+                    for (MenuAuth.MenuAuthDetail detail : menuAuth.menuAuthDetail()) {
+                        menuRoleService.saveMenuRole(
+                                MenuRoleVo.builder()
+                                        .menuId(newMenu.getMenuId())
+                                        .roleId(detail.roleId())
+                                        .read(detail.read())
+                                        .write(detail.write())
+                                        .upload(detail.upload())
+                                        .download(detail.download())
+                                        .dbRemarks("초기 구동시 자동 입력된 데이터")
+                                        .isDeleted(false)
+                                        .build());
+                    }
+                }
+            });
+        });
     }
 }

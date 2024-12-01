@@ -1,7 +1,10 @@
 package com.neighborcouponbook.filters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neighborcouponbook.common.components.AuthorizationResult;
 import com.neighborcouponbook.common.context.RequestContext;
+import com.neighborcouponbook.common.response.ApiResponse;
+import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.service.JwtService;
 import com.neighborcouponbook.common.util.RequestTokenUtil;
 import com.neighborcouponbook.model.search.MenuRoleSearch;
@@ -19,9 +22,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,9 +41,9 @@ import java.util.List;
 @Log4j2
 @RequiredArgsConstructor
 @Component
-public class MenuAuthenticationFilter implements Filter {
+public class MenuAuthenticationFilter extends OncePerRequestFilter {
 
-    @Value("${filter-setting.menu-auth-filter}")
+    @Value("${menu.filter-setting.menu-auth-filter}")
     private boolean menuAuthFilter;
 
     private final MenuAuthorizationService menuAuthorizationService;
@@ -46,10 +54,8 @@ public class MenuAuthenticationFilter implements Filter {
      *
      * */
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
-
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         try {
             // 요청 IP 주소 가져오기
             String clientIp = request.getRemoteAddr();
@@ -59,24 +65,14 @@ public class MenuAuthenticationFilter implements Filter {
             }
             log.info("Client IP: {}", clientIp);
 
-            /**
-             * URI 추출 및 권한 확인 로직
-             * method 확인
-             * */
-            String requestUri = ((HttpServletRequest) servletRequest).getRequestURI();
+            String requestUri = request.getRequestURI();
             log.info("Request URI : {} ", requestUri);
             StringBuilder uri = new StringBuilder(requestUri);
 
             if(uri.toString().startsWith("http")) {
                 uri = new StringBuilder();
-
-                // 1. http cutting
                 String[] fristCut = requestUri.split("//");
-
-                // 2. / slash cutting
                 String[] secondCut = fristCut[1].split("/");
-
-                // 3. domain cutting
                 for (int i = 1; i < secondCut.length; i++) {
                     uri.append(secondCut[i]);
                 }
@@ -84,13 +80,11 @@ public class MenuAuthenticationFilter implements Filter {
 
             String token = RequestTokenUtil.parseBearerToken(request);
 
-            // 값이 없다면 쿠키값도 한번더 체크
             if(token == null) {
                 log.info("token is null, check cookies");
                 token = RequestTokenUtil.parseBearerTokenCookies(request);
             }
 
-            // HTTP 메서드 확인 (GET, POST, PUT, DELETE 등)
             String method = request.getMethod().toLowerCase();
 
             RequestContext requestContext = RequestContext.builder()
@@ -106,17 +100,38 @@ public class MenuAuthenticationFilter implements Filter {
                 if (result.isAuthorized()) {
                     filterChain.doFilter(request, response);
                 } else {
-                    // 권한이 없는 경우 401 응답
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"" + result.getErrorMessage() + "\"}");
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write(ResponseUtil.responseEntityMapperString(null,null,-1,result.getErrorMessage(), HttpStatus.FORBIDDEN));
                 }
-            }else{
+            } else {
                 filterChain.doFilter(request, response);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "에러가 발생했습니다.");
+
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(ResponseUtil.responseEntityMapperString(null,null,-1, "에러가 발생했습니다.", HttpStatus.FORBIDDEN));
         }
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String[] excludePath = {
+                "/auth/main",
+                "/auth/user/login",
+                "/auth/user/join",
+                "/auth/test/welcome",
+                "/auth/test/user/lubid",
+                "/public/file/**",
+                "/swagger-ui/**",
+                "/v3/api-docs/**"
+        };
+
+        String path = request.getRequestURI();
+        PathMatcher pathMatcher = new AntPathMatcher();
+
+        return Arrays.stream(excludePath).anyMatch(path::startsWith);
     }
 }

@@ -147,21 +147,23 @@ public class MenuAuthorizationServiceImpl implements MenuAuthorizationService {
 
         List<MenuVo> menus = null;
 
-        switch (menuProperty){
-            case STATIC:
-                menus = menuVoList
-                        .stream()
-                        .filter(menu -> menu.getMenuProperty() == Menu.MenuProperty.STATIC)
-                        .filter(menu -> menu.getMenuUri().equals(requestUri))
-                        .collect(Collectors.toList());
-                break;
-            case DYNAMIC:
-                menus = menuVoList
-                        .stream()
-                        .filter(menu -> menu.getMenuProperty() == Menu.MenuProperty.DYNAMIC)
-                        .filter(menu -> matchesDynamicPattern(requestUri, menu.getMenuUri()))
-                        .collect(Collectors.toList());
-                break;
+        if(menuProperty != null) {
+            switch (menuProperty){
+                case STATIC:
+                    menus = menuVoList
+                            .stream()
+                            .filter(menu -> menu.getMenuProperty() == Menu.MenuProperty.STATIC)
+                            .filter(menu -> menu.getMenuUri().equals(requestUri))
+                            .collect(Collectors.toList());
+                    break;
+                case DYNAMIC:
+                    menus = menuVoList
+                            .stream()
+                            .filter(menu -> menu.getMenuProperty() == Menu.MenuProperty.DYNAMIC)
+                            .filter(menu -> matchesDynamicPattern(requestUri, menu.getMenuUri()))
+                            .collect(Collectors.toList());
+                    break;
+            }
         }
 
         return menus;
@@ -204,15 +206,22 @@ public class MenuAuthorizationServiceImpl implements MenuAuthorizationService {
     }
 
     private AuthorizationResult checkMethodPermission(String method, MenuRoleVo menuRole) {
+        String permissionMessage = "";
         boolean hasPermission = switch (method.toLowerCase()) {
-            case "get" -> menuRole.getRead();
-            case "post", "put", "delete" -> menuRole.getWrite();
+            case "get" ->{
+                permissionMessage = "읽기";
+                yield menuRole.getRead();
+            }
+            case "post", "put", "delete" -> {
+                permissionMessage = "수정";
+                yield  menuRole.getWrite();
+            }
             default -> false;
         };
 
         return hasPermission
                 ? AuthorizationResult.authorized()
-                : AuthorizationResult.denied("Insufficient permissions for this operation");
+                : AuthorizationResult.denied("해당 메뉴의 " + permissionMessage + " 권한이 없습니다.");
     }
 }
 

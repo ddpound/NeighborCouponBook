@@ -26,4 +26,9 @@ public class AuthUtil {
             return null;
         }
     }
+
+    public static Long getLoginUserId() {
+        if(getLoginUserData() != null) getLoginUserData().getUserId();
+        return null;
+    }
 }
