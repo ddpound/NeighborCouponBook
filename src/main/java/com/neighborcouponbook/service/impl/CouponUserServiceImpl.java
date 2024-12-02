@@ -1,6 +1,6 @@
 package com.neighborcouponbook.service.impl;
 
-import com.neighborcouponbook.common.response.ApiResponse;
+import com.neighborcouponbook.common.response.ApiCommonResponse;
 import com.neighborcouponbook.common.response.ResponseMetaData;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
@@ -57,14 +57,14 @@ public class CouponUserServiceImpl implements CouponUserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ResponseEntity<?> createCouponUser(CouponUserVo couponUserVo) {
+    public ResponseEntity<ApiCommonResponse<String>> createCouponUser(CouponUserVo couponUserVo) {
         try {
-            ResponseEntity<?> validationData = couponUserVoValidation(couponUserVo);
+            ResponseEntity<ApiCommonResponse<String>> validationData = couponUserVoValidation(couponUserVo);
             if(validationData != null) return validationData;
 
             // 검증 완료 후 유저 데이터 저장
             CouponUser complteUser = couponUserRepository
-                    .save(settingCreateUserWithCreateData(couponUserVo, AuthUtil.getLoginUserData().getUserId()));
+                    .save(settingCreateUserWithCreateData(couponUserVo, AuthUtil.getLoginUserId() != null ? AuthUtil.getLoginUserId() : 1L));
 
             // 먼저 권한을 가져온다. 초기 유저 생성시 권한은 일반 유저다.  2가 일반유저 아이디
             UserRole createUserRole = new UserRole();
@@ -81,8 +81,8 @@ public class CouponUserServiceImpl implements CouponUserService {
         try {
             ResponseEntity<?> validationData = couponUserVoValidation(couponUserVo);
             if(validationData != null) {
-                ApiResponse<?> apiResponse = (ApiResponse<?>) validationData.getBody();
-                log.info("USER JOIN -> validation check message : {}", apiResponse.getMessage());
+                ApiCommonResponse<?> apiCommonResponse = (ApiCommonResponse<?>) validationData.getBody();
+                log.info("USER JOIN -> validation check message : {}", apiCommonResponse.getMessage());
                 return validationData;
             }
 
@@ -106,7 +106,7 @@ public class CouponUserServiceImpl implements CouponUserService {
     }
 
     @Override
-    public ResponseEntity<?> couponUserVoValidation(CouponUserVo couponUserVo) {
+    public ResponseEntity<ApiCommonResponse<String>> couponUserVoValidation(CouponUserVo couponUserVo) {
         if(couponUserVo.getUserLoginId() == null) return ResponseUtil.createSuccessResponse(-1, "입력 로그인 아이디가 없습니다.");
         if(couponUserVo.getUserName() == null || couponUserVo.getUserName().isEmpty()) return ResponseUtil.createSuccessResponse(-1, "유저 이름이 없습니다.");
         if(loginIdDuplicateCheck(couponUserVo)) return ResponseUtil.createSuccessResponse(-1, "이미 있는 로그인 아이디 입니다.");

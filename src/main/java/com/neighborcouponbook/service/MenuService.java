@@ -1,5 +1,6 @@
 package com.neighborcouponbook.service;
 
+import com.neighborcouponbook.common.response.ApiCommonResponse;
 import com.neighborcouponbook.model.Menu;
 import com.neighborcouponbook.model.search.MenuSearch;
 import com.neighborcouponbook.model.vo.MenuVo;
@@ -16,16 +17,16 @@ public interface MenuService {
 
     List<MenuVo> selectMenuList(MenuSearch menuSearch);
 
-    ResponseEntity<?> responseSelectMenuList(MenuSearch menuSearch);
+    ResponseEntity<ApiCommonResponse<List<MenuVo>>> responseSelectMenuList(MenuSearch menuSearch);
 
     /** 메뉴 리스트 카운트 */
     Long selectMenuTotalCount(MenuSearch menuSearch);
 
-    ResponseEntity<?> createMenu(Menu menu);
+    ResponseEntity<ApiCommonResponse<Menu>> createMenu(Menu menu);
 
-    ResponseEntity<?> createMenu(MenuVo menuVo);
+    ResponseEntity<ApiCommonResponse<Menu>> createMenu(MenuVo menuVo);
 
-    ResponseEntity<?> createMenu(List<MenuVo> menuVoList);
+    ResponseEntity<ApiCommonResponse<String>> createMenu(List<MenuVo> menuVoList);
 
     ResponseEntity<?> updateMenu(Menu menu);
 

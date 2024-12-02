@@ -1,21 +1,10 @@
 package com.neighborcouponbook.filters;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neighborcouponbook.common.components.AuthorizationResult;
 import com.neighborcouponbook.common.context.RequestContext;
-import com.neighborcouponbook.common.response.ApiResponse;
 import com.neighborcouponbook.common.response.ResponseUtil;
-import com.neighborcouponbook.common.service.JwtService;
 import com.neighborcouponbook.common.util.RequestTokenUtil;
-import com.neighborcouponbook.model.search.MenuRoleSearch;
-import com.neighborcouponbook.model.search.MenuSearch;
-import com.neighborcouponbook.model.vo.MenuRoleVo;
-import com.neighborcouponbook.model.vo.MenuVo;
-import com.neighborcouponbook.service.CouponUserService;
 import com.neighborcouponbook.service.MenuAuthorizationService;
-import com.neighborcouponbook.service.MenuRoleService;
-import com.neighborcouponbook.service.MenuService;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 메뉴 권한을 확인하는 필터

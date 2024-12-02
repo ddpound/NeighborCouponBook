@@ -1,5 +1,6 @@
 package com.neighborcouponbook.service;
 
+import com.neighborcouponbook.common.response.ApiCommonResponse;
 import com.neighborcouponbook.model.MenuRole;
 import com.neighborcouponbook.model.search.MenuRoleSearch;
 import com.neighborcouponbook.model.vo.MenuRoleVo;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public interface MenuRoleService {
 
-    ResponseEntity<?> saveMenuRole(MenuRoleVo menuRoleVo);
+    ResponseEntity<ApiCommonResponse<String>> saveMenuRole(MenuRoleVo menuRoleVo);
 
     ResponseEntity<?> saveMenuRoles(List<MenuRoleVo> menuRoleVos);
 

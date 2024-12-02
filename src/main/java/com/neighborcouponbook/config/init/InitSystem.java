@@ -1,7 +1,7 @@
 package com.neighborcouponbook.config.init;
 
 import com.neighborcouponbook.common.annotation.MenuInformation;
-import com.neighborcouponbook.common.response.ApiResponse;
+import com.neighborcouponbook.common.response.ApiCommonResponse;
 import com.neighborcouponbook.model.CouponUser;
 import com.neighborcouponbook.model.Menu;
 import com.neighborcouponbook.model.Role;
@@ -194,7 +194,7 @@ public class InitSystem implements CommandLineRunner {
                             .dbRemarks(description.isEmpty() ? "초기 세팅 메뉴 리스트" : description)
                             .build();
 
-                    ApiResponse<?> returnResponse = null;
+                    ApiCommonResponse<?> returnResponse = null;
 
                     // list static, dynamic 구분 리스트
                     if(allMenu != null && !allMenu.isEmpty()) {
@@ -202,11 +202,11 @@ public class InitSystem implements CommandLineRunner {
 
                         // menu가 존재 하지 않을때만 저장
                         if (menus == null) {
-                            returnResponse = (ApiResponse<?>) menuService.createMenu(menu).getBody();
+                            returnResponse = (ApiCommonResponse<?>) menuService.createMenu(menu).getBody();
                             allMenu.add(menu);
                         }
                     }else{
-                        returnResponse = (ApiResponse<?>) menuService.createMenu(menu).getBody();
+                        returnResponse = (ApiCommonResponse<?>) menuService.createMenu(menu).getBody();
                         allMenu.add(menu);
                     }
 

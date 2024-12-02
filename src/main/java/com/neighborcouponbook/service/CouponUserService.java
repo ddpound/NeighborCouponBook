@@ -1,5 +1,6 @@
 package com.neighborcouponbook.service;
 
+import com.neighborcouponbook.common.response.ApiCommonResponse;
 import com.neighborcouponbook.model.CouponUser;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
@@ -18,7 +19,7 @@ public interface CouponUserService {
      * 컨트롤러단에서 직접받아 처리하는 메소드
      * 유저 생성
      * */
-    ResponseEntity<?> createCouponUser(CouponUserVo couponUserVo);
+    ResponseEntity<ApiCommonResponse<String>> createCouponUser(CouponUserVo couponUserVo);
 
     /**
      * 회원가입(초기 요청)

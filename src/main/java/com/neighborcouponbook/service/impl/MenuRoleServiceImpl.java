@@ -1,6 +1,7 @@
 package com.neighborcouponbook.service.impl;
 
 
+import com.neighborcouponbook.common.response.ApiCommonResponse;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.common.util.NullChecker;
@@ -35,7 +36,7 @@ public class MenuRoleServiceImpl implements MenuRoleService {
 
     @Transactional
     @Override
-    public ResponseEntity<?> saveMenuRole(MenuRoleVo menuRoleVo) {
+    public ResponseEntity<ApiCommonResponse<String>> saveMenuRole(MenuRoleVo menuRoleVo) {
         try {
             MenuRole saveMenuRole = new MenuRole();
 
@@ -43,10 +44,10 @@ public class MenuRoleServiceImpl implements MenuRoleService {
             saveMenuRole.settingCreateData(AuthUtil.getLoginUserId() != null ? AuthUtil.getLoginUserId() : 1L);
 
             menuRoleRepository.save(saveMenuRole);
-            return ResponseUtil.createSuccessResponse(1,  "저장에 성공했습니다.");
+            return ResponseUtil.createResponse(null, 1, "저장에 성공했습니다.", HttpStatus.OK);
         }catch (Exception e) {
             log.error(e);
-            return ResponseUtil.createSuccessResponse(-1,  "저장에 실패했습니다 : ");
+            return ResponseUtil.createResponse(null, -1, "저장에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -67,7 +68,8 @@ public class MenuRoleServiceImpl implements MenuRoleService {
             menuRoleRepository.saveAll(saveMenuRoleList);
             return ResponseUtil.createSuccessResponse(1,  "저장에 성공했습니다.");
         }catch (Exception e) {
-            return ResponseUtil.createSuccessResponse(-1,  "저장에 실패했습니다 : " + e.getMessage());
+            log.error(e);
+            return ResponseUtil.createSuccessResponse(-1,  "저장에 실패했습니다 : ");
         }
     }
 

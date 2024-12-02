@@ -1,5 +1,6 @@
 package com.neighborcouponbook.service.impl;
 
+import com.neighborcouponbook.common.response.ApiCommonResponse;
 import com.neighborcouponbook.common.response.ResponseMetaData;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
@@ -54,7 +55,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<?> responseSelectMenuList(MenuSearch menuSearch) {
+    public ResponseEntity<ApiCommonResponse<List<MenuVo>>> responseSelectMenuList(MenuSearch menuSearch) {
 
         List<Menu> resultList = selectMenuListQuery(menuSearch).fetch();
 
@@ -78,24 +79,24 @@ public class MenuServiceImpl implements MenuService {
 
     @Transactional
     @Override
-    public ResponseEntity<?> createMenu(Menu menu) {
+    public ResponseEntity<ApiCommonResponse<Menu>> createMenu(Menu menu) {
         try {
-            menuRepository.save(menu);
+            Menu newMenu = menuRepository.save(menu);
 
-            return ResponseUtil.createSuccessResponse(1,"메뉴 저장이 완료되었습니다.");
+            return ResponseUtil.createResponse(newMenu,1,"메뉴 저장에 성공했습니다.", HttpStatus.OK);
         } catch (ConstraintViolationException e) {
-            return ResponseUtil.createSuccessResponse(-1,"동일한 데이터를 입력했습니다.");
+            return ResponseUtil.createResponse(null,-1,"동일한 데이터를 입력했습니다.", HttpStatus.BAD_REQUEST);
         } catch (Exception e){
-            return ResponseUtil.createSuccessResponse(-1,"메뉴 저장이 실패했습니다. : " + e.getMessage());
+            return ResponseUtil.createResponse(null,-1,"에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Transactional
     @Override
-    public ResponseEntity<?> createMenu(MenuVo menuVo) {
+    public ResponseEntity<ApiCommonResponse<Menu>> createMenu(MenuVo menuVo) {
        try {
            if(menuVo == null || menuVo.getMenuName() == null || menuVo.getMenuUri() == null)
-               return ResponseUtil.createSuccessResponse(-1,"메뉴 이름이나 uri 가 비어있습니다. ");
+               return ResponseUtil.createResponse(null,-1,"메뉴 이름이나 URI가 비어있습니다.", HttpStatus.BAD_REQUEST);
 
            Menu createMenu = new Menu();
            createMenu.createMenu(menuVo.getMenuUri(), menuVo.getMenuName(), menuVo.getParentMenuId());
@@ -108,13 +109,13 @@ public class MenuServiceImpl implements MenuService {
            return ResponseUtil.createResponse(newMenu,1,"메뉴 저장이 완료 되었습니다", HttpStatus.OK);
        }catch (Exception e){
            log.error(e);
-           return ResponseUtil.createSuccessResponse(-1,"메뉴 저장이 실패했습니다. : ");
+           return ResponseUtil.createResponse(null,-1,"메뉴 저장이 실패했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ResponseEntity<?> createMenu(List<MenuVo> menuVoList) {
+    public ResponseEntity<ApiCommonResponse<String>> createMenu(List<MenuVo> menuVoList) {
 
         try {
             if(menuVoList != null && !menuVoList.isEmpty()){

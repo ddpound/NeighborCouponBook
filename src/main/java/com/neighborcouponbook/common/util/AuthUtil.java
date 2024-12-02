@@ -8,11 +8,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class AuthUtil {
 
     public static CouponUserVo getLoginUserData(){
-
         if(SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext().getAuthentication() != null){
             // 현재 인증된 사용자 정보 가져오기
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
 
             // 인증 객체에서 Principal 객체 가져오기
             PrincipalDetail principalDetail = (PrincipalDetail) authentication.getPrincipal();
