@@ -57,3 +57,7 @@ springdoc:
     path: /api-docs
   cache:
     disabled: true
+
+file-manage:
+  root-file-path: /Users/youseongjung
+  folder-name: neighbor-coupon-files

@@ -7,6 +7,7 @@
 - [코드 가이드 문서](docs/code-guide.md)
 - [메뉴 필터 문서](docs/menu-filter.md)
 - [초기 구동시 메뉴 자동등록 관련 문서](docs/menu-db-manage.md)
+- [DB 시퀸스 모음](docs/db-sequences.md)
 
 ### 계획
 1. google play store 정책 변경으로 2주간의 서비스 테스트를 반드시 진행해야함.

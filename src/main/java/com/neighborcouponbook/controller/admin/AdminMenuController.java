@@ -35,7 +35,7 @@ public class AdminMenuController {
     private final MenuAuthorizationService menuAuthorizationService;
 
     @Operation(
-            summary = "메뉴 리스트 가져오기",
+            summary = "관리자 메뉴 리스트 가져오기",
             description = "등록되어있는 메뉴 정보를 가져옵니다.",
             responses = {
                     @ApiResponse(
