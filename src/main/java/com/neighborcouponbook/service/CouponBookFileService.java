@@ -13,7 +13,7 @@ public interface CouponBookFileService {
 
     FileUploadResponse uploadFiles(List<MultipartFile> files);
 
-    ZipResource downloadFilesByGroupId(String groupId);
+    ZipResource downloadFilesByGroupId(Long fileGroupId);
 
     void deleteFile(Long fileId);
 

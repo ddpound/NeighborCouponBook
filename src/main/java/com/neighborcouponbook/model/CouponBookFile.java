@@ -29,4 +29,13 @@ public class CouponBookFile extends CommonColumn{
     private String physicalFileName;
 
     private String originalFileName;
+
+
+    public void initCouponBookFile(Long fileGroupId, Long fileSerialNo ,String physicalFileName, String physicalFilePath, String originalFileName) {
+        this.fileGroupId = fileGroupId;
+        this.fileSerialNo = fileSerialNo;
+        this.physicalFilePath = physicalFilePath;
+        this.physicalFileName = physicalFileName;
+        this.originalFileName = originalFileName;
+    }
 }
