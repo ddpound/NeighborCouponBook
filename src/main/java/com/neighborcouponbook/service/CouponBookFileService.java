@@ -17,11 +17,13 @@ public interface CouponBookFileService {
 
     void deleteFile(Long fileId);
 
-    void deleteFilesByGroupId(String groupId);
+    void deleteFilesByGroupId(Long groupId);
 
     /** 파일 그룹 시퀸스 실행하고 해당 값을 가져오는 메소드 */
     Long getNextFileGroupId();
 
     /** 파일 그룹의 현재 값만 체크해줌, 시퀸스 값이 올라가지않음. */
     Long getCurrentValue();
+
+    void todayFileFolder();
 }
