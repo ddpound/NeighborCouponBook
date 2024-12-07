@@ -2,14 +2,14 @@ package com.neighborcouponbook.config.init;
 
 import com.neighborcouponbook.common.annotation.MenuInformation;
 import com.neighborcouponbook.common.response.ApiCommonResponse;
-import com.neighborcouponbook.model.CouponUser;
-import com.neighborcouponbook.model.Menu;
-import com.neighborcouponbook.model.Role;
-import com.neighborcouponbook.model.UserRole;
+import com.neighborcouponbook.model.*;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.search.RoleSearch;
 import com.neighborcouponbook.model.search.UserRoleSearch;
 import com.neighborcouponbook.model.vo.*;
+import com.neighborcouponbook.repository.CouponUserRepository;
+import com.neighborcouponbook.repository.ShopRepository;
+import com.neighborcouponbook.repository.ShopTypeRepository;
 import com.neighborcouponbook.repository.UserRoleRepository;
 import com.neighborcouponbook.service.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +36,9 @@ import java.util.Set;
 public class InitSystem implements CommandLineRunner {
 
     private final UserRoleRepository userRoleRepository;
+    private final CouponUserRepository couponUserRepository;
+    private final ShopRepository shopRepository;
+    private final ShopTypeRepository shopTypeRepository;
 
     @Value("${admin-setting.super-admin-id}")
     private Long superAdminId;
@@ -82,6 +85,8 @@ public class InitSystem implements CommandLineRunner {
 
             // 엔드포인트에 등록된 메뉴 추가
             createBaseMenuList();
+
+            createDefaultShop();
         }
 
 
@@ -138,6 +143,43 @@ public class InitSystem implements CommandLineRunner {
             superRole.writeDbRemarks("Normal User Role");
 
             roleService.saveRole(superRole);
+        }
+    }
+
+    public void createDefaultShop(){
+
+        //create shoptype
+        int typeCnt = shopTypeRepository.countByIsDeleted(false);
+        if (typeCnt < 1) {
+            ShopType shopType = new ShopType();
+            shopType.createShopType("카페");
+            shopType.writeDbRemarks("초기데이터");
+            shopType.settingCreateData(superAdminId);
+
+            shopTypeRepository.save(shopType);
+        }
+
+        //create shop
+        int shopCnt = shopRepository.countByIsDeleted(false);
+        if (shopCnt < 1) {
+            Shop shop = new Shop();
+            shop.settingCreateData(superAdminId);
+
+            CouponUser user = couponUserRepository.findById(1L)
+                            .orElseThrow(() -> new IllegalArgumentException("error finding user"));
+
+            ShopType shopType = shopTypeRepository.findById(1L)
+                            .orElseThrow(() -> new IllegalArgumentException("error finding shoptype"));
+
+           shop.createShop(
+                   user,
+                   shopType,
+                   "테스트카페",
+                   "테스트주소",
+                   "111-22-33333",
+                   "테스트 카페 설명입니다.");
+           shop.writeDbRemarks("초기데이터");
+           shopRepository.save(shop);
         }
     }
 

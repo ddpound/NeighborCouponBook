@@ -7,10 +7,14 @@ import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-
+/*
+* ShopType도 여기서 같이 관리
+* */
 public interface ShopService {
 
     ResponseEntity<?> createShop(ShopVo shopVo);
+
+    ResponseEntity<?> createShopType(ShopVo shopVo);
     ResponseEntity<?> updateShop(Long shopId, ShopVo shopVo);
 
     ResponseEntity<?> deleteShop(Long shopId, ShopVo shopVo);

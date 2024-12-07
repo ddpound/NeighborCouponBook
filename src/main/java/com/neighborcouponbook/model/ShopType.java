@@ -25,4 +25,8 @@ public class ShopType extends CommonColumn{
     private long shopTypeId;
 
     private String shopTypeName;
+
+    public void createShopType(String shopTypeName) {
+        this.shopTypeName = shopTypeName;
+    }
 }

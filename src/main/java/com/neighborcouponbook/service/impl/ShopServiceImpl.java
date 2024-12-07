@@ -60,6 +60,22 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional
+    public ResponseEntity<?> createShopType(ShopVo shopVo) {
+        try {
+            ShopType shopType = new ShopType();
+            shopType.createShopType(shopVo.getShopTypeName());
+            shopType.settingCreateData(AuthUtil.getLoginUserData().getUserId());
+
+            shopTypeRepository.save(shopType);
+
+            return ResponseUtil.createSuccessResponse(1, "저장이 완료되었습니다.");
+        } catch (Exception e) {
+            return ResponseUtil.createSuccessResponse(-1, "저장에 실패했습니다. : " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
     public ResponseEntity<?> updateShop(Long id, ShopVo shopVo) {
         try {
             Shop updatedShopInfo = shopRepository.findById(id)
@@ -99,9 +115,15 @@ public class ShopServiceImpl implements ShopService {
             QCouponUser user = QCouponUser.couponUser;
 
             List<Tuple> results = queryFactory
-                    .select(shop,
+                    .select(shop.shopId,
+                            shop.couponUser.userId,
                             user.userName,
-                            shopType.shopTypeName)
+                            shop.shopType.shopTypeId,
+                            shopType.shopTypeName,
+                            shop.shopName,
+                            shop.shopAddress,
+                            shop.businessRegistrationNumber,
+                            shop.shopDescription)
                     .from(shop)
                     .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
                     .join(shop.couponUser, user).on(user.isDeleted.eq(false))
@@ -136,6 +158,7 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ShopVo selectShopInfo(Long shopId) {
         QShop shop = QShop.shop;
         QShopType shopType = QShopType.shopType;
