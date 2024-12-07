@@ -1,12 +1,9 @@
 package com.neighborcouponbook.model.vo;
 
 import com.neighborcouponbook.common.util.NullChecker;
-import com.neighborcouponbook.model.CouponUser;
-import com.neighborcouponbook.model.Menu;
 import com.neighborcouponbook.model.Shop;
-import com.neighborcouponbook.model.ShopType;
+import com.querydsl.core.Tuple;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -20,7 +17,8 @@ import java.util.List;
 @Data
 public class ShopVo extends CommonColumnVo{
     private Long shopId;
-    private Long userId;
+    private Long userId; //shopOwnerId
+    private String shopOwnerName;
     private Long shopTypeId;
     private String shopTypeName;
     private String shopName;
@@ -33,7 +31,6 @@ public class ShopVo extends CommonColumnVo{
 
         if(!NullChecker.isNull(shop.getShopId())) shopVo.setShopId(shop.getShopId());
         if(!NullChecker.isNullString(shop.getShopName())) shopVo.setShopName(shop.getShopName());
-//        if(!NullChecker.isNullString(shop.getShopType())) menuVo.setMenuName(menu.getMenuName()); //shoptypename 어쩌지??
         if(!NullChecker.isNullString(shop.getShopAddress())) shopVo.setShopAddress(shop.getShopAddress());
         if(!NullChecker.isNullString(shop.getBusinessRegistrationNumber())) shopVo.setBusinessRegistrationNumber(shop.getBusinessRegistrationNumber());
         if(!NullChecker.isNullString(shop.getShopDescription())) shopVo.setShopDescription(shop.getShopDescription());

@@ -2,16 +2,13 @@ package com.neighborcouponbook.service.impl;
 
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
-import com.neighborcouponbook.model.CouponUser;
-import com.neighborcouponbook.model.QShop;
-import com.neighborcouponbook.model.Shop;
-import com.neighborcouponbook.model.ShopType;
+import com.neighborcouponbook.model.*;
 import com.neighborcouponbook.model.vo.ShopVo;
 import com.neighborcouponbook.repository.CouponUserRepository;
 import com.neighborcouponbook.repository.ShopRepository;
 import com.neighborcouponbook.repository.ShopTypeRepository;
 import com.neighborcouponbook.service.ShopService;
-import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -20,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -97,20 +95,40 @@ public class ShopServiceImpl implements ShopService {
     public List<ShopVo> selectShopList(Long userId) {
         try {
             QShop shop = QShop.shop;
+            QShopType shopType = QShopType.shopType;
+            QCouponUser user = QCouponUser.couponUser;
 
-            List<Shop> list = queryFactory
-                    .select(shop)
+            List<Tuple> results = queryFactory
+                    .select(shop,
+                            user.userName,
+                            shopType.shopTypeName)
                     .from(shop)
-                    .join(shop.shopType).fetchJoin()
-                    .where( shop.couponUser.userId.eq(userId)
-                            .and(shop.isDeleted.eq(false))
+                    .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
+                    .join(shop.couponUser, user).on(user.isDeleted.eq(false))
+                    .where(
+                            shop.couponUser.userId.eq(userId)
+                                    .and(shop.isDeleted.eq(false))
                     )
                     .fetch();
 
-            ShopVo vo = new ShopVo();
-            List<ShopVo> voList = vo.convertToShopVoList(list);
-            //수정필요. type 안나온다
-            return voList;
+            // 조회 결과가 없으면 null 반환 또는 예외 처리
+            if (results == null) {
+                throw new RuntimeException("등록한 상점 정보가 없습니다.");
+            }
+
+            return results.stream()
+                    .map(tuple -> new ShopVo(
+                            tuple.get(shop.shopId),
+                            tuple.get(shop.couponUser.userId),
+                            tuple.get(user.userName),
+                            tuple.get(shop.shopType.shopTypeId),
+                            tuple.get(shopType.shopTypeName),
+                            tuple.get(shop.shopName),
+                            tuple.get(shop.shopAddress),
+                            tuple.get(shop.businessRegistrationNumber),
+                            tuple.get(shop.shopDescription)
+                    ))
+                    .collect(Collectors.toList());
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -118,7 +136,45 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public JPAQuery<QShop> selectShopInfo(Long shopId) {
-        return null;
+    public ShopVo selectShopInfo(Long shopId) {
+        QShop shop = QShop.shop;
+        QShopType shopType = QShopType.shopType;
+        QCouponUser user = QCouponUser.couponUser;
+
+        Tuple shopVo = queryFactory
+                .select(shop.shopId,
+                        shop.couponUser.userId,
+                        user.userName,
+                        shop.shopType.shopTypeId,
+                        shopType.shopTypeName,
+                        shop.shopName,
+                        shop.shopAddress,
+                        shop.businessRegistrationNumber,
+                        shop.shopDescription)
+                .from(shop)
+                .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
+                .join(shop.couponUser, user).on(user.isDeleted.eq(false))
+                .where(
+                        shop.shopId.eq(shopId)
+                                .and(shop.isDeleted.eq(false))
+                )
+                .fetchOne();
+
+        // 조회 결과가 없으면 null 반환 또는 예외 처리
+        if (shopVo == null) {
+            throw new RuntimeException("유효한 상점 정보가 아닙니다.");
+        }
+
+        return new ShopVo(
+                shopVo.get(shop.shopId),
+                shopVo.get(shop.couponUser.userId),
+                shopVo.get(user.userName),
+                shopVo.get(shop.shopType.shopTypeId),
+                shopVo.get(shopType.shopTypeName),
+                shopVo.get(shop.shopName),
+                shopVo.get(shop.shopAddress),
+                shopVo.get(shop.businessRegistrationNumber),
+                shopVo.get(shop.shopDescription)
+                );
     }
 }

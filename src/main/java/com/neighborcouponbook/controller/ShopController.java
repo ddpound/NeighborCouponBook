@@ -33,6 +33,11 @@ public class ShopController {
     @PostMapping(value = "delete")
     public ResponseEntity<?> deleteShop(@RequestParam(value = "id") Long shopId, @RequestBody ShopVo shopVo) { return shopService.deleteShop(shopId, shopVo); }
 
+    // 사장시점 - 샵 리스트
     @GetMapping(value = "shops")
     public List<ShopVo> selectShopListOfUser(@RequestParam(value = "id") Long userId) { return shopService.selectShopList(userId); };
+
+    //  shop detail page
+    @GetMapping(value = "info")
+    public ShopVo selectShopInfo(@RequestParam Long shopId) { return shopService.selectShopInfo(shopId); }
 }
