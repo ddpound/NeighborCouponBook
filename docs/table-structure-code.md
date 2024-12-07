@@ -1,5 +1,9 @@
 site : https://dbdiagram.io/home
+
 ```
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
 Table follows {
   following_user_id integer
   followed_user_id integer
@@ -100,7 +104,7 @@ Table coupon_object{
   x_coordinate integer
   y_coordinate integer
   state        integer // 속성, 이미지, 쿠폰이미지, 도장레이어 등등
-  file_group_id integer
+  file_id integer
 
   // 아래는 공통 컬럼
   create_date timestamp
@@ -128,12 +132,13 @@ Table coupon_history{
   db_remarks   varchar
 }
 
-Table file{
-  file_group_id integer [primary key]
+Table couponBookFile{
+  file_id integer [primary key]
+  file_group_id integer
   file_sers_no integer
   physical_file_path varchar // 저장된 경로
   physical_file_name varchar // 물리적으로 저장되어있는 name , UUID
-  file_original_name varchar // 저장했었던 이름.
+  original_file_name varchar // 저장했었던 이름.
 }
 
 Ref: posts.user_id > coupon_user.user_id // many-to-one
@@ -148,9 +153,9 @@ Ref: coupon.shop_id > shop.shop_id
 
 Ref: coupon_object.coupon_id > coupon.coupon_id
 
-Ref: file.file_group_id - coupon_object.file_group_id
+Ref: couponBookFile.file_id - coupon_object.file_id
 
-Ref: coupon_user.thumbnail - file.file_group_id
+Ref: coupon_user.thumbnail - couponBookFile.file_id
 
 // coupon history area
 Ref: coupon_history.owner_coupon_user > coupon_user.user_id
@@ -159,6 +164,7 @@ Ref: coupon_history.coupon_id > coupon.coupon_id
 
 //shop_type area
 Ref: shop.shop_type_id > shop_type.shop_type_id
+
 
 
 
