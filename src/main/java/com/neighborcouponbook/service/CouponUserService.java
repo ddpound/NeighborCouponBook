@@ -5,6 +5,7 @@ import com.neighborcouponbook.model.CouponUser;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
+import com.neighborcouponbook.model.vo.PasswordChangeRequest;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.http.ResponseEntity;
@@ -66,4 +67,10 @@ public interface CouponUserService {
     Long selectCouponUserQueryJoinUserRoleTotalCount(CouponUserSearch search);
 
     ResponseEntity<?> responseSelectCouponUserQueryJoinUserRole(CouponUserSearch search);
+
+    ResponseEntity<ApiCommonResponse<CouponUserVo>> updateCouponUser(CouponUserVo couponUserVo);
+
+    ResponseEntity<ApiCommonResponse<CouponUserVo>> couponUserPasswordChange(PasswordChangeRequest passwordChangeRequest);
+
+    ResponseEntity<ApiCommonResponse<CouponUserVo>> updateCouponUserType(CouponUserVo couponUserVo);
 }

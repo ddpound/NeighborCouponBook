@@ -3,10 +3,12 @@ package com.neighborcouponbook.service.impl;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.model.*;
+import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.model.vo.ShopVo;
 import com.neighborcouponbook.repository.CouponUserRepository;
 import com.neighborcouponbook.repository.ShopRepository;
 import com.neighborcouponbook.repository.ShopTypeRepository;
+import com.neighborcouponbook.service.CouponUserService;
 import com.neighborcouponbook.service.ShopService;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -27,6 +29,7 @@ public class ShopServiceImpl implements ShopService {
     private final ShopRepository shopRepository;
     private final CouponUserRepository couponUserRepository;
     private final ShopTypeRepository shopTypeRepository;
+    private final CouponUserService couponUserService;
 
     @Override
     @Transactional
@@ -51,6 +54,14 @@ public class ShopServiceImpl implements ShopService {
             shop.settingCreateData(AuthUtil.getLoginUserData().getUserId());
 
             shopRepository.save(shop);
+
+            /**
+             *  초기 생성이니 유저 타입도 같이 진행
+             *  TODO : 해당 메소드 내부에 한번더 select가 진행되어 2중 select임 updateCouponUserType 메소드의 로직을 분리할 필요가 있음.
+             * */
+            CouponUserVo couponUserVo = new CouponUserVo().convertToVo(couponUser);
+            couponUserVo.setUserType(CouponUser.UserType.SHOPOWNER);
+            couponUserService.updateCouponUserType(couponUserVo);
 
             return ResponseUtil.createSuccessResponse(1, "shop [" + shopVo.getShopName() + "] 저장이 완료되었습니다.");
         } catch (Exception e) {

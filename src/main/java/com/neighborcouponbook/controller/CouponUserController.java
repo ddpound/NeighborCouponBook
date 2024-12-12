@@ -8,6 +8,7 @@ import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
+import com.neighborcouponbook.model.vo.PasswordChangeRequest;
 import com.neighborcouponbook.service.CouponUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -155,4 +156,92 @@ public class CouponUserController {
     public ResponseEntity<ApiCommonResponse<String>> create(@RequestBody CouponUserVo couponUserVo) {
         return couponUserService.createCouponUser(couponUserVo);
     }
+
+    @Operation(
+            summary = "유저 업데이트",
+            description = "유저 업데이트, 객체의 모든 값들은 필수로 넣어주여아한다.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = CouponUserVo.class))
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            useReturnTypeSchema = true
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러"
+                    )
+            }
+    )
+    @MenuInformation(
+            menuAuthDetail = {
+                    @MenuInformation.MenuRoleDetail(rolesName = "super-admin", roleId = 1),
+                    @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
+            })
+    @PutMapping(value = "update")
+    public ResponseEntity<ApiCommonResponse<CouponUserVo>> updateCouponUser(@RequestBody CouponUserVo couponUserVo) {
+        return couponUserService.updateCouponUser(couponUserVo);
+    }
+
+    @Operation(
+            summary = "유저 업데이트",
+            description = "유저 업데이트, 객체의 모든 값들은 필수로 넣어주여아한다.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = CouponUserVo.class))
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            useReturnTypeSchema = true
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러"
+                    )
+            }
+    )
+    @MenuInformation(
+            menuAuthDetail = {
+                    @MenuInformation.MenuRoleDetail(rolesName = "super-admin", roleId = 1),
+                    @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
+            })
+    @PutMapping(value = "update-user-type")
+    public ResponseEntity<ApiCommonResponse<CouponUserVo>> updateCouponUserType(@RequestBody CouponUserVo couponUserVo) {
+        return couponUserService.updateCouponUserType(couponUserVo);
+    }
+
+    @Operation(
+            summary = "유저 비밀번호 변경",
+            description = "유저 비밀번호 업데이트",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = PasswordChangeRequest.class))
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            useReturnTypeSchema = true
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러"
+                    )
+            }
+    )
+    @MenuInformation(
+            menuAuthDetail = {
+                    @MenuInformation.MenuRoleDetail(rolesName = "super-admin", roleId = 1),
+                    @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
+            })
+    @PutMapping(value = "change-password")
+    public ResponseEntity<ApiCommonResponse<CouponUserVo>> couponUserPasswordChange(@RequestBody PasswordChangeRequest passwordChangeRequest) {
+        return couponUserService.couponUserPasswordChange(passwordChangeRequest);
+    }
+
 }

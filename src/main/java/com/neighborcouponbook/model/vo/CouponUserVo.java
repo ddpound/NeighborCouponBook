@@ -22,8 +22,8 @@ public class CouponUserVo extends CommonColumnVo {
     private String userLoginId;
     private String userName;
     private String password;
-
     private String token;
+    private CouponUser.UserType userType;
 
     public CouponUserVo convertToVo(CouponUser couponUser) {
         CouponUserVo couponUserVo = new CouponUserVo();

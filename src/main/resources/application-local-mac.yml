@@ -31,7 +31,7 @@ jwt:
 
 admin-setting:
   super-admin-id: 1
-  super-admin-login-id: superAdmin
+  super-admin-login-id: couponadmin
   super-admin-pw: 1234
   super-admin-role-name: super-admin
   super-admin-role-id: 1

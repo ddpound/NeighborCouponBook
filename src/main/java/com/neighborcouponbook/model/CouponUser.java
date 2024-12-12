@@ -31,6 +31,8 @@ public class CouponUser extends CommonColumn{
     @Column(nullable = false)
     private String password;
 
+    private UserType userType;
+
     public void initCouponUser(Long userId, String userLoginId, String userName, String password) {
         this.userId = userId;
         this.userLoginId = userLoginId;
@@ -51,10 +53,26 @@ public class CouponUser extends CommonColumn{
         this.password = passwordEncoder.getBCryptPasswordEncoder().encode(password);
     }
 
+    /**
+     * @param userLoginId login id 입니다.
+     * @param userName nickName입니다.
+     * */
+    public void updateCouponUser(String userLoginId, String userName) {
+        this.userLoginId = userLoginId;
+        this.userName = userName;
+    }
+
     public void changePassword(String password){
         CommonBCryptPasswordEncoder passwordEncoder = new CommonBCryptPasswordEncoder();
 
         this.password = passwordEncoder.getBCryptPasswordEncoder().encode(password);
     }
 
+    public void initUserType(UserType userType) {
+        this.userType = userType;
+    }
+
+    public enum UserType{
+        CUSTOMER, SHOPOWNER
+    }
 }

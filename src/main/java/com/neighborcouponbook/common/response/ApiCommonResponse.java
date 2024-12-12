@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 @Schema(description = "API 공통 응답 객체")
 @Builder
@@ -23,4 +24,7 @@ public class ApiCommonResponse<T> {
 
     @Schema(description = "응답메세지")
     private String message;
+
+    @Schema(description = "HTTP 상태코드")
+    private HttpStatus httpStatus;
 }

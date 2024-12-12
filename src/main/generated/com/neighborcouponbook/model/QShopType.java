@@ -10,14 +10,14 @@ import com.querydsl.core.types.Path;
 
 
 /**
- * QCouponUser is a Querydsl query type for CouponUser
+ * QShopType is a Querydsl query type for ShopType
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QCouponUser extends EntityPathBase<CouponUser> {
+public class QShopType extends EntityPathBase<ShopType> {
 
-    private static final long serialVersionUID = 1898223862L;
+    private static final long serialVersionUID = -1917121419L;
 
-    public static final QCouponUser couponUser = new QCouponUser("couponUser");
+    public static final QShopType shopType = new QShopType("shopType");
 
     public final QCommonColumn _super = new QCommonColumn(this);
 
@@ -33,10 +33,12 @@ public class QCouponUser extends EntityPathBase<CouponUser> {
     //inherited
     public final BooleanPath isDeleted = _super.isDeleted;
 
-    public final StringPath password = createString("password");
-
     //inherited
     public final StringPath remarks = _super.remarks;
+
+    public final NumberPath<Long> shopTypeId = createNumber("shopTypeId", Long.class);
+
+    public final StringPath shopTypeName = createString("shopTypeName");
 
     //inherited
     public final DateTimePath<java.sql.Timestamp> updateDate = _super.updateDate;
@@ -44,24 +46,16 @@ public class QCouponUser extends EntityPathBase<CouponUser> {
     //inherited
     public final NumberPath<Long> updateUser = _super.updateUser;
 
-    public final NumberPath<Long> userId = createNumber("userId", Long.class);
-
-    public final StringPath userLoginId = createString("userLoginId");
-
-    public final StringPath userName = createString("userName");
-
-    public final EnumPath<CouponUser.UserType> userType = createEnum("userType", CouponUser.UserType.class);
-
-    public QCouponUser(String variable) {
-        super(CouponUser.class, forVariable(variable));
+    public QShopType(String variable) {
+        super(ShopType.class, forVariable(variable));
     }
 
-    public QCouponUser(Path<? extends CouponUser> path) {
+    public QShopType(Path<? extends ShopType> path) {
         super(path.getType(), path.getMetadata());
     }
 
-    public QCouponUser(PathMetadata metadata) {
-        super(CouponUser.class, metadata);
+    public QShopType(PathMetadata metadata) {
+        super(ShopType.class, metadata);
     }
 
 }

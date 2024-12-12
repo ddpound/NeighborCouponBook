@@ -13,6 +13,7 @@ import com.neighborcouponbook.model.search.CommonSearch;
 import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.model.vo.CouponUserWithUserRole;
+import com.neighborcouponbook.model.vo.PasswordChangeRequest;
 import com.neighborcouponbook.model.vo.UserRoleVo;
 import com.neighborcouponbook.repository.CouponUserRepository;
 import com.neighborcouponbook.service.CouponUserService;
@@ -26,12 +27,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Log4j2
@@ -43,6 +46,8 @@ public class CouponUserServiceImpl implements CouponUserService {
     private final CouponUserRepository couponUserRepository;
 
     private final UserRoleService userRoleService;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     @Override
@@ -280,6 +285,92 @@ public class CouponUserServiceImpl implements CouponUserService {
                     "에러 발생",
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
+        }
+    }
+
+    /**
+     * userdata 전체 수정
+     * user data는 운영자가 아니면 자기 자신만 수정 가능합니다.
+     * */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResponseEntity<ApiCommonResponse<CouponUserVo>> updateCouponUser(CouponUserVo couponUserVo) {
+        try {
+            Optional<CouponUser> findUser = couponUserRepository.findById(couponUserVo.getUserId());
+            CouponUserVo returnCouponUserVo = new CouponUserVo();
+
+            if(findUser.isEmpty()) return ResponseUtil.createErrorResponse("데이터가 없습니다.");
+            if(Objects.equals(AuthUtil.getLoginUserId(), findUser.get().getUserId())) return ResponseUtil.createErrorResponse("자기 자신만 자신의 데이터를 수정 할수 있습니다.");
+
+            // 더티체킹
+            findUser.get().updateCouponUser(
+                    couponUserVo.getUserLoginId(),
+                    couponUserVo.getUserName()
+            );
+
+            // user type 변경
+            if(couponUserVo.getUserType() != null) {
+                findUser.get().initUserType(couponUserVo.getUserType());
+            }
+
+            return ResponseUtil.createSuccessResponse(
+                    returnCouponUserVo.convertToVo(findUser.get()),
+                    "업데이트가 완료되었습니다."
+            );
+        } catch (NullPointerException e) {
+            return ResponseUtil.createErrorResponse("데이터에 빈 값이 있습니다.");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResponseEntity<ApiCommonResponse<CouponUserVo>> updateCouponUserType(CouponUserVo couponUserVo) {
+        try {
+            Optional<CouponUser> findUser = couponUserRepository.findById(couponUserVo.getUserId());
+            CouponUserVo returnCouponUserVo = new CouponUserVo();
+
+            if(findUser.isEmpty()) return ResponseUtil.createErrorResponse("데이터가 없습니다.");
+            if(Objects.equals(AuthUtil.getLoginUserId(), findUser.get().getUserId())) return ResponseUtil.createErrorResponse("자기 자신만 자신의 데이터를 수정 할수 있습니다.");
+
+            // user type 변경
+            if(couponUserVo.getUserType() != null) {
+                findUser.get().initUserType(couponUserVo.getUserType());
+            }
+
+            return ResponseUtil.createSuccessResponse(
+                    returnCouponUserVo.convertToVo(findUser.get()),
+                    "업데이트가 완료되었습니다."
+            );
+        } catch (NullPointerException e) {
+            return ResponseUtil.createErrorResponse("데이터에 빈 값이 있습니다.");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResponseEntity<ApiCommonResponse<CouponUserVo>> couponUserPasswordChange(PasswordChangeRequest passwordChangeRequest) {
+
+        try {
+            if(new PasswordChangeRequest().validate(passwordChangeRequest))
+                return ResponseUtil.createErrorResponse("필수 입력값이 빠졌습니다.", HttpStatus.BAD_REQUEST);
+
+            Optional<CouponUser> findUser = couponUserRepository.findById(passwordChangeRequest.getUserId());
+
+            if(findUser.isEmpty()) return ResponseUtil.createErrorResponse("데이터가 없습니다.");
+            if(Objects.equals(AuthUtil.getLoginUserId(), findUser.get().getUserId())) return ResponseUtil.createErrorResponse("자기 자신만 자신의 데이터를 수정 할수 있습니다.");
+            if(!passwordEncoder.matches(passwordChangeRequest.getOldPassword(), findUser.get().getPassword())) return ResponseUtil.createErrorResponse("비밀번호가 다릅니다.");
+
+            findUser.get().changePassword(passwordChangeRequest.getNewPassword());
+
+            return ResponseUtil.createSuccessResponse(new CouponUserVo().convertToVo(findUser.get()), "비밀번호 변경에 성공했습니다.");
+        } catch (NullPointerException e) {
+            return ResponseUtil.createErrorResponse("데이터에 빈 값이 있습니다.");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

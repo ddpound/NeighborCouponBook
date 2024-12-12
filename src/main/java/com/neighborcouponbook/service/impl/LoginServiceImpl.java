@@ -41,7 +41,7 @@ public class LoginServiceImpl implements LoginService {
         log.info("try userLoginId : {}", userVo.getUserLoginId());
 
         if(NullChecker.isNull(userVo) || NullChecker.isNull(userVo.getUserLoginId()) || NullChecker.isNull(userVo.getPassword()))
-            return ResponseUtil.createResponse(null, -1,"비밀번호나 패스워드를 입력해주세요.", HttpStatus.OK);
+            return ResponseUtil.createResponse(null, -1,"비밀번호나 패스워드를 입력해주세요.", HttpStatus.BAD_REQUEST);
 
         String userLoginId = userVo.getUserLoginId();
         String password = userVo.getPassword();
@@ -50,7 +50,7 @@ public class LoginServiceImpl implements LoginService {
 
         // 1. 로그인 아이디가 없음
         if(selectVo == null)
-            return ResponseUtil.createResponse(null, -1,"해당 아이디가 없습니다", HttpStatus.OK);
+            return ResponseUtil.createResponse(null, -1,"해당 아이디가 없습니다", HttpStatus.BAD_REQUEST);
 
         CouponUserSearch search = new CouponUserSearch();
         search.setUserLoginId(userLoginId);
@@ -58,7 +58,7 @@ public class LoginServiceImpl implements LoginService {
 
         // 2.password 검사
         if(!passwordEncoder.getBCryptPasswordEncoder().matches(password, selectPassword))
-            return ResponseUtil.createResponse(null, -1,"패스워드가 틀립니다.", HttpStatus.OK);
+            return ResponseUtil.createResponse(null, -1,"패스워드가 틀립니다.", HttpStatus.BAD_REQUEST);
 
         // 검증 완료 토큰 생성 시작
         CouponUser couponUser = new CouponUser();
