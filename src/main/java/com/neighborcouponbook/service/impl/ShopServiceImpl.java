@@ -60,7 +60,7 @@ public class ShopServiceImpl implements ShopService {
              *  TODO : 해당 메소드 내부에 한번더 select가 진행되어 2중 select임 updateCouponUserType 메소드의 로직을 분리할 필요가 있음.
              * */
             CouponUserVo couponUserVo = new CouponUserVo().convertToVo(couponUser);
-            couponUserVo.setUserType(CouponUser.UserType.SHOPOWNER);
+            couponUserVo.setCouponUserType(CouponUser.CouponUserType.SHOPOWNER);
             couponUserService.updateCouponUserType(couponUserVo);
 
             return ResponseUtil.createSuccessResponse(1, "shop [" + shopVo.getShopName() + "] 저장이 완료되었습니다.");

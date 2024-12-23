@@ -25,7 +25,7 @@ public class Shop extends CommonColumn{
     @JoinColumn(name = "user_id")
     private CouponUser couponUser;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_type_id")
     private ShopType shopType;
 

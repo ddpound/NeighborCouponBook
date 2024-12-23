@@ -309,8 +309,8 @@ public class CouponUserServiceImpl implements CouponUserService {
             );
 
             // user type 변경
-            if(couponUserVo.getUserType() != null) {
-                findUser.get().initUserType(couponUserVo.getUserType());
+            if(couponUserVo.getCouponUserType() != null) {
+                findUser.get().initUserType(couponUserVo.getCouponUserType());
             }
 
             return ResponseUtil.createSuccessResponse(
@@ -335,8 +335,8 @@ public class CouponUserServiceImpl implements CouponUserService {
             if(Objects.equals(AuthUtil.getLoginUserId(), findUser.get().getUserId())) return ResponseUtil.createErrorResponse("자기 자신만 자신의 데이터를 수정 할수 있습니다.");
 
             // user type 변경
-            if(couponUserVo.getUserType() != null) {
-                findUser.get().initUserType(couponUserVo.getUserType());
+            if(couponUserVo.getCouponUserType() != null) {
+                findUser.get().initUserType(couponUserVo.getCouponUserType());
             }
 
             return ResponseUtil.createSuccessResponse(

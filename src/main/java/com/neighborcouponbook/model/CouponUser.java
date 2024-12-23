@@ -31,7 +31,8 @@ public class CouponUser extends CommonColumn{
     @Column(nullable = false)
     private String password;
 
-    private UserType userType;
+    @Enumerated(EnumType.STRING)
+    private CouponUserType couponUserType;
 
     public void initCouponUser(Long userId, String userLoginId, String userName, String password) {
         this.userId = userId;
@@ -68,11 +69,11 @@ public class CouponUser extends CommonColumn{
         this.password = passwordEncoder.getBCryptPasswordEncoder().encode(password);
     }
 
-    public void initUserType(UserType userType) {
-        this.userType = userType;
+    public void initUserType(CouponUserType couponUserType) {
+        this.couponUserType = couponUserType;
     }
 
-    public enum UserType{
+    public enum CouponUserType {
         CUSTOMER, SHOPOWNER
     }
 }

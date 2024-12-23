@@ -21,6 +21,8 @@ public class QCouponUser extends EntityPathBase<CouponUser> {
 
     public final QCommonColumn _super = new QCommonColumn(this);
 
+    public final EnumPath<CouponUser.CouponUserType> couponUserType = createEnum("couponUserType", CouponUser.CouponUserType.class);
+
     //inherited
     public final DateTimePath<java.sql.Timestamp> createDate = _super.createDate;
 
@@ -49,8 +51,6 @@ public class QCouponUser extends EntityPathBase<CouponUser> {
     public final StringPath userLoginId = createString("userLoginId");
 
     public final StringPath userName = createString("userName");
-
-    public final EnumPath<CouponUser.UserType> userType = createEnum("userType", CouponUser.UserType.class);
 
     public QCouponUser(String variable) {
         super(CouponUser.class, forVariable(variable));
