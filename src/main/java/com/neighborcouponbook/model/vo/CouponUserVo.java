@@ -37,6 +37,8 @@ public class CouponUserVo extends CommonColumnVo {
         // password를 반환받을 경우는 거의없음.
         //if(!NullChecker.isNullString(couponUser.getPassword())) couponUserDto.setPassword(couponUser.getPassword());
 
+        if(!NullChecker.isNull(couponUser.getCouponUserType())) couponUserVo.setCouponUserType(couponUser.getCouponUserType());
+
         return couponUserVo;
     }
 

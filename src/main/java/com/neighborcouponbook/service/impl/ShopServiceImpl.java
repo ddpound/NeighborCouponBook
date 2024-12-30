@@ -85,6 +85,16 @@ public class ShopServiceImpl implements ShopService {
         }
     }
 
+    @Transactional
+    public ResponseEntity<?> selectShopTypeList(){
+        try {
+
+            return ResponseUtil.createSuccessResponse(1, "저장이 완료되었습니다.");
+        } catch (Exception e) {
+            return ResponseUtil.createSuccessResponse(-1, "저장에 실패했습니다. : " + e.getMessage());
+        }
+    }
+
     @Override
     @Transactional
     public ResponseEntity<?> updateShop(Long id, ShopVo shopVo) {
