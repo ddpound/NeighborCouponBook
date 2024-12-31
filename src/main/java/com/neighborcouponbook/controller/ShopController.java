@@ -2,6 +2,7 @@ package com.neighborcouponbook.controller;
 
 import com.neighborcouponbook.common.annotation.MenuInformation;
 import com.neighborcouponbook.common.response.ResponseUtil;
+import com.neighborcouponbook.model.search.ShopTypeSearch;
 import com.neighborcouponbook.model.vo.ShopVo;
 import com.neighborcouponbook.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -129,7 +130,7 @@ public class ShopController {
                     @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
             })
     @GetMapping(value = "type/list")
-    public ResponseEntity<?> selectShopTypeList(){
-        return ResponseUtil.createResponse(null,null,1,"반환성공", HttpStatus.OK);
+    public ResponseEntity<?> selectShopTypeList(ShopTypeSearch search) {
+        return shopService.selectShopTypeList(search);
     }
 }

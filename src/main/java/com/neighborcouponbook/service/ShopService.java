@@ -1,6 +1,8 @@
 package com.neighborcouponbook.service;
 
 import com.neighborcouponbook.model.QShop;
+import com.neighborcouponbook.model.search.ShopTypeSearch;
+import com.neighborcouponbook.model.vo.ShopTypeVo;
 import com.neighborcouponbook.model.vo.ShopVo;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -22,4 +24,7 @@ public interface ShopService {
     List<ShopVo> selectShopList(Long userId);
 
     ShopVo selectShopInfo(Long shopId);
+
+    ResponseEntity<?> selectShopTypeList(ShopTypeSearch search);
+
 }

@@ -22,6 +22,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -151,12 +152,23 @@ public class InitSystem implements CommandLineRunner {
         //create shoptype
         int typeCnt = shopTypeRepository.countByIsDeleted(false);
         if (typeCnt < 1) {
-            ShopType shopType = new ShopType();
-            shopType.createShopType("카페");
-            shopType.writeDbRemarks("초기데이터");
-            shopType.settingCreateData(superAdminId);
+            List<ShopType> insertShopTypeList = new ArrayList<>();
 
-            shopTypeRepository.save(shopType);
+            // 카페 초기등록
+            ShopType cafeShopType = new ShopType();
+            cafeShopType.createShopType("카페");
+            cafeShopType.writeDbRemarks("초기데이터");
+            cafeShopType.settingCreateData(superAdminId);
+            insertShopTypeList.add(cafeShopType);
+
+
+            ShopType foodShopType = new ShopType();
+            foodShopType.createShopType("음식점");
+            foodShopType.writeDbRemarks("초기데이터");
+            foodShopType.settingCreateData(superAdminId);
+            insertShopTypeList.add(foodShopType);
+
+            shopTypeRepository.saveAll(insertShopTypeList);
         }
 
         //create shop

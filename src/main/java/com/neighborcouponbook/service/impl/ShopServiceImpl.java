@@ -1,9 +1,12 @@
 package com.neighborcouponbook.service.impl;
 
+import com.neighborcouponbook.common.response.ResponseMetaData;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.model.*;
+import com.neighborcouponbook.model.search.ShopTypeSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
+import com.neighborcouponbook.model.vo.ShopTypeVo;
 import com.neighborcouponbook.model.vo.ShopVo;
 import com.neighborcouponbook.repository.CouponUserRepository;
 import com.neighborcouponbook.repository.ShopRepository;
@@ -14,10 +17,12 @@ import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,13 +90,28 @@ public class ShopServiceImpl implements ShopService {
         }
     }
 
-    @Transactional
-    public ResponseEntity<?> selectShopTypeList(){
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> selectShopTypeList(ShopTypeSearch search){
         try {
+            QShopType qShopType = QShopType.shopType;
+            List<ShopType> selectQShopTypeList =
+                    queryFactory
+                            .select(qShopType)
+                            .from(qShopType)
+                            .fetch();
 
-            return ResponseUtil.createSuccessResponse(1, "저장이 완료되었습니다.");
+            List<ShopTypeVo> resultShopTypeList = ShopTypeVo.builder().build().converToShopTypeVoList(selectQShopTypeList);
+
+            ResponseMetaData responseMetaData = ResponseMetaData
+                    .builder()
+                    .dataTotalCount((long) selectQShopTypeList.size())
+                    .dataDescription("카페 타입에 관한 데이터입니다.")
+                    .build();
+
+            return ResponseUtil.createResponse(resultShopTypeList, responseMetaData, 1,"카페 타입 반환에 성공했습니다", HttpStatus.OK);
         } catch (Exception e) {
-            return ResponseUtil.createSuccessResponse(-1, "저장에 실패했습니다. : " + e.getMessage());
+            return ResponseUtil.createSuccessResponse(-1, "반환에 실패했습니다 : " + e.getMessage());
         }
     }
 
