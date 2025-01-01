@@ -161,7 +161,7 @@ public class InitSystem implements CommandLineRunner {
             cafeShopType.settingCreateData(superAdminId);
             insertShopTypeList.add(cafeShopType);
 
-
+            // 음식점 등록
             ShopType foodShopType = new ShopType();
             foodShopType.createShopType("음식점");
             foodShopType.writeDbRemarks("초기데이터");

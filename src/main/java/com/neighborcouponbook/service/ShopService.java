@@ -1,6 +1,7 @@
 package com.neighborcouponbook.service;
 
 import com.neighborcouponbook.model.QShop;
+import com.neighborcouponbook.model.search.ShopSearch;
 import com.neighborcouponbook.model.search.ShopTypeSearch;
 import com.neighborcouponbook.model.vo.ShopTypeVo;
 import com.neighborcouponbook.model.vo.ShopVo;
@@ -17,13 +18,13 @@ public interface ShopService {
     ResponseEntity<?> createShop(ShopVo shopVo);
 
     ResponseEntity<?> createShopType(ShopVo shopVo);
-    ResponseEntity<?> updateShop(Long shopId, ShopVo shopVo);
+    ResponseEntity<?> updateShop(ShopVo shopVo);
 
     ResponseEntity<?> deleteShop(Long shopId, ShopVo shopVo);
 
-    List<ShopVo> selectShopList(Long userId);
+    List<ShopVo> selectShopList(ShopSearch search);
 
-    ShopVo selectShopInfo(Long shopId);
+    ShopVo selectShopInfo(ShopSearch search);
 
     ResponseEntity<?> selectShopTypeList(ShopTypeSearch search);
 

@@ -4,6 +4,7 @@ import com.neighborcouponbook.common.response.ResponseMetaData;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.model.*;
+import com.neighborcouponbook.model.search.ShopSearch;
 import com.neighborcouponbook.model.search.ShopTypeSearch;
 import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.model.vo.ShopTypeVo;
@@ -58,7 +59,7 @@ public class ShopServiceImpl implements ShopService {
                     shopVo.getShopDescription());
             shop.settingCreateData(AuthUtil.getLoginUserData().getUserId());
 
-            shopRepository.save(shop);
+            ShopVo returnShopVo = ShopVo.builder().build().convertToShopVo(shopRepository.save(shop));
 
             /**
              *  초기 생성이니 유저 타입도 같이 진행
@@ -68,7 +69,15 @@ public class ShopServiceImpl implements ShopService {
             couponUserVo.setCouponUserType(CouponUser.CouponUserType.SHOPOWNER);
             couponUserService.updateCouponUserType(couponUserVo);
 
-            return ResponseUtil.createSuccessResponse(1, "shop [" + shopVo.getShopName() + "] 저장이 완료되었습니다.");
+            return ResponseUtil.createResponse(returnShopVo,
+                    ResponseMetaData.builder()
+                            .dataDescription("가게 등록 성공 데이터 입니다.")
+                            .dataTotalCount(1L)
+                            .build(),
+                    1 ,
+                    "저장이 완료되었습니다.",
+                    HttpStatus.OK
+            );
         } catch (Exception e) {
             return ResponseUtil.createSuccessResponse(-1, "shop 저장에 실패했습니다. : " + e.getMessage());
         }
@@ -117,9 +126,9 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional
-    public ResponseEntity<?> updateShop(Long id, ShopVo shopVo) {
+    public ResponseEntity<?> updateShop(ShopVo shopVo) {
         try {
-            Shop updatedShopInfo = shopRepository.findById(id)
+            Shop updatedShopInfo = shopRepository.findById(shopVo.getShopId())
                     .orElseThrow(() -> new IllegalArgumentException("상점 정보가 존재하지 않습니다."));
 
             updatedShopInfo.updateShop(shopVo.getShopAddress(), shopVo.getBusinessRegistrationNumber(), shopVo.getShopDescription());
@@ -149,7 +158,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ShopVo> selectShopList(Long userId) {
+    public List<ShopVo> selectShopList(ShopSearch search) {
         try {
             QShop shop = QShop.shop;
             QShopType shopType = QShopType.shopType;
@@ -169,7 +178,7 @@ public class ShopServiceImpl implements ShopService {
                     .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
                     .join(shop.couponUser, user).on(user.isDeleted.eq(false))
                     .where(
-                            shop.couponUser.userId.eq(userId)
+                            shop.couponUser.userId.eq(search.getUserId())
                                     .and(shop.isDeleted.eq(false))
                     )
                     .fetch();
@@ -200,7 +209,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional(readOnly = true)
-    public ShopVo selectShopInfo(Long shopId) {
+    public ShopVo selectShopInfo(ShopSearch search) {
         QShop shop = QShop.shop;
         QShopType shopType = QShopType.shopType;
         QCouponUser user = QCouponUser.couponUser;
@@ -219,7 +228,7 @@ public class ShopServiceImpl implements ShopService {
                 .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
                 .join(shop.couponUser, user).on(user.isDeleted.eq(false))
                 .where(
-                        shop.shopId.eq(shopId)
+                        shop.shopId.eq(search.getShopId())
                                 .and(shop.isDeleted.eq(false))
                 )
                 .fetchOne();
