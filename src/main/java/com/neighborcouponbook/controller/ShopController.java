@@ -140,7 +140,9 @@ public class ShopController {
                     @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
             })
     @GetMapping(value = "info")
-    public ShopVo selectShopInfo(ShopSearch search) { return shopService.selectShopInfo(search); }
+    public ShopVo selectShopInfo(ShopSearch search) {
+        return shopService.selectShopInfo(search);
+    }
 
     @Operation(
             summary = "가게 타입 생성",

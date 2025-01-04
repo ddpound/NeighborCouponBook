@@ -51,6 +51,8 @@ public class QShop extends EntityPathBase<Shop> {
 
     public final StringPath shopName = createString("shopName");
 
+    public final QCouponBookFile shopThumbnail;
+
     public final QShopType shopType;
 
     //inherited
@@ -78,6 +80,7 @@ public class QShop extends EntityPathBase<Shop> {
     public QShop(Class<? extends Shop> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.couponUser = inits.isInitialized("couponUser") ? new QCouponUser(forProperty("couponUser")) : null;
+        this.shopThumbnail = inits.isInitialized("shopThumbnail") ? new QCouponBookFile(forProperty("shopThumbnail")) : null;
         this.shopType = inits.isInitialized("shopType") ? new QShopType(forProperty("shopType")) : null;
     }
 

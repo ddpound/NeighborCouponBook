@@ -1,9 +1,5 @@
-site : https://dbdiagram.io/home
-
+site : https://dbdiagram.io/
 ```
-// Use DBML to define your database structure
-// Docs: https://dbml.dbdiagram.io/docs
-
 Table follows {
   following_user_id integer
   followed_user_id integer
@@ -54,6 +50,7 @@ Table shop{
   shop_owner_id integer // 샵 사장
   shop_owner_name varchar
   shop_type_id integer
+  shop_thumbnail integer
 
   // 아래는 공통 컬럼
   create_date timestamp
@@ -132,7 +129,7 @@ Table coupon_history{
   db_remarks   varchar
 }
 
-Table couponBookFile{
+Table coupon_book_file{
   file_id integer [primary key]
   file_group_id integer
   file_sers_no integer
@@ -148,14 +145,15 @@ Ref: coupon_user.user_id < follows.following_user_id
 Ref: coupon_user.user_id < follows.followed_user_id
 
 Ref: shop.shop_owner_id > coupon_user.user_id
+Ref: shop.shop_thumbnail - coupon_book_file.file_id
 
 Ref: coupon.shop_id > shop.shop_id
 
 Ref: coupon_object.coupon_id > coupon.coupon_id
 
-Ref: couponBookFile.file_id - coupon_object.file_id
+Ref: coupon_book_file.file_id - coupon_object.file_id
 
-Ref: coupon_user.thumbnail - couponBookFile.file_id
+Ref: coupon_user.thumbnail - coupon_book_file.file_id
 
 // coupon history area
 Ref: coupon_history.owner_coupon_user > coupon_user.user_id
@@ -164,8 +162,6 @@ Ref: coupon_history.coupon_id > coupon.coupon_id
 
 //shop_type area
 Ref: shop.shop_type_id > shop_type.shop_type_id
-
-
 
 
 ```

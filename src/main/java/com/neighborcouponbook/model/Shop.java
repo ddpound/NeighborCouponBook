@@ -33,6 +33,10 @@ public class Shop extends CommonColumn{
     private String businessRegistrationNumber;
     private String shopDescription;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    private CouponBookFile shopThumbnail;
+
     public void createShop(CouponUser couponUser, ShopType shopType, String shopName, String shopAddress, String businessRegistrationNumber, String shopDescription) {
 
         if(!NullChecker.isNull(couponUser)) this.couponUser = couponUser;
