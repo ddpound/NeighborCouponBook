@@ -21,7 +21,14 @@ spring:
       ddl-auto: create
   application:
     name: NeighborhoodCouponBook
-
+  servlet:
+    multipart:
+      max-request-size: 10MB
+      max-file-size: 10MB
+      enabled: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 # custom setting
 jwt:
   jwt-password: 10120*32teat12491024u1209481204981204912840192ur0192ru0129ru10r9u12r091ur019r2u120r9u120r912u

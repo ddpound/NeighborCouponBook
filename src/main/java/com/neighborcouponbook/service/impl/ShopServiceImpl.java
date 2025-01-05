@@ -1,17 +1,20 @@
 package com.neighborcouponbook.service.impl;
 
+import com.neighborcouponbook.common.response.FileUploadResponse;
 import com.neighborcouponbook.common.response.ResponseMetaData;
 import com.neighborcouponbook.common.response.ResponseUtil;
 import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.model.*;
 import com.neighborcouponbook.model.search.ShopSearch;
 import com.neighborcouponbook.model.search.ShopTypeSearch;
+import com.neighborcouponbook.model.vo.CouponBookFileVo;
 import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.model.vo.ShopTypeVo;
 import com.neighborcouponbook.model.vo.ShopVo;
 import com.neighborcouponbook.repository.CouponUserRepository;
 import com.neighborcouponbook.repository.ShopRepository;
 import com.neighborcouponbook.repository.ShopTypeRepository;
+import com.neighborcouponbook.service.CouponBookFileService;
 import com.neighborcouponbook.service.CouponUserService;
 import com.neighborcouponbook.service.ShopService;
 import com.querydsl.core.Tuple;
@@ -22,9 +25,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -36,10 +41,11 @@ public class ShopServiceImpl implements ShopService {
     private final CouponUserRepository couponUserRepository;
     private final ShopTypeRepository shopTypeRepository;
     private final CouponUserService couponUserService;
+    private final CouponBookFileService couponBookFileService;
 
     @Override
     @Transactional
-    public ResponseEntity<?> createShop(ShopVo shopVo) {
+    public ResponseEntity<?> createShop(ShopVo shopVo , MultipartFile file) {
         try {
             if (shopVo == null) {
                 return ResponseUtil.createSuccessResponse(-1, "입력 데이터가 없습니다.");
@@ -50,9 +56,24 @@ public class ShopServiceImpl implements ShopService {
             ShopType shopType = shopTypeRepository.findById(shopVo.getShopTypeId())
                     .orElseThrow(() -> new IllegalArgumentException("유효한 업종 정보가 없습니다."));
 
+            CouponBookFile couponBookFile = null;
+
+            if(file != null && !file.isEmpty()){
+                List<MultipartFile> files = new ArrayList<>();
+                files.add(file);
+                FileUploadResponse fileResponse = couponBookFileService.uploadFiles(files);
+
+                if(fileResponse != null && fileResponse.getFiles() != null && !fileResponse.getFiles().isEmpty()){
+                    // file data 는 무조건 하나
+                    couponBookFile = couponBookFileService.selectCouponBookFile(fileResponse.getFiles().get(0).getFileId());
+                }
+
+            }
+
             Shop shop = new Shop();
             shop.createShop(couponUser,
                     shopType,
+                    couponBookFile,
                     shopVo.getShopName(),
                     shopVo.getShopAddress(),
                     shopVo.getBusinessRegistrationNumber(),
@@ -198,7 +219,8 @@ public class ShopServiceImpl implements ShopService {
                             tuple.get(shop.shopName),
                             tuple.get(shop.shopAddress),
                             tuple.get(shop.businessRegistrationNumber),
-                            tuple.get(shop.shopDescription)
+                            tuple.get(shop.shopDescription),
+                            tuple.get(shop.shopThumbnail) != null ? new CouponBookFileVo().convertToVo(tuple.get(shop.shopThumbnail)) : null
                     ))
                     .collect(Collectors.toList());
 
@@ -247,7 +269,8 @@ public class ShopServiceImpl implements ShopService {
                 shopVo.get(shop.shopName),
                 shopVo.get(shop.shopAddress),
                 shopVo.get(shop.businessRegistrationNumber),
-                shopVo.get(shop.shopDescription)
+                shopVo.get(shop.shopDescription),
+                shopVo.get(shop.shopThumbnail) != null ? new CouponBookFileVo().convertToVo(shopVo.get(shop.shopThumbnail)) : null
                 );
     }
 }

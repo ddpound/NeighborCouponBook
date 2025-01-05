@@ -186,6 +186,7 @@ public class InitSystem implements CommandLineRunner {
            shop.createShop(
                    user,
                    shopType,
+                   null,
                    "테스트카페",
                    "테스트주소",
                    "111-22-33333",

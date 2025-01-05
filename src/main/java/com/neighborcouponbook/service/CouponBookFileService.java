@@ -2,12 +2,15 @@ package com.neighborcouponbook.service;
 
 import com.neighborcouponbook.common.response.FileUploadResponse;
 import com.neighborcouponbook.common.response.ZipResource;
+import com.neighborcouponbook.model.CouponBookFile;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface CouponBookFileService {
+
+    CouponBookFile selectCouponBookFile(Long id);
 
     Resource downloadFile(Long fileId);
 

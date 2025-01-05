@@ -8,6 +8,7 @@ import com.neighborcouponbook.model.vo.ShopVo;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 /*
@@ -15,7 +16,7 @@ import java.util.List;
 * */
 public interface ShopService {
 
-    ResponseEntity<?> createShop(ShopVo shopVo);
+    ResponseEntity<?> createShop(ShopVo shopVo, MultipartFile file);
 
     ResponseEntity<?> createShopType(ShopVo shopVo);
     ResponseEntity<?> updateShop(ShopVo shopVo);

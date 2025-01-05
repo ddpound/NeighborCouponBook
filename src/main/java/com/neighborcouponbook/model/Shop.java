@@ -37,10 +37,17 @@ public class Shop extends CommonColumn{
     @JoinColumn
     private CouponBookFile shopThumbnail;
 
-    public void createShop(CouponUser couponUser, ShopType shopType, String shopName, String shopAddress, String businessRegistrationNumber, String shopDescription) {
+    public void createShop(CouponUser couponUser,
+                           ShopType shopType,
+                           CouponBookFile shopThumbnail,
+                           String shopName,
+                           String shopAddress,
+                           String businessRegistrationNumber,
+                           String shopDescription) {
 
         if(!NullChecker.isNull(couponUser)) this.couponUser = couponUser;
         if(!NullChecker.isNull(shopType)) this.shopType = shopType;
+        if(!NullChecker.isNull(shopThumbnail)) this.shopThumbnail = shopThumbnail;
         this.shopName = shopName;
         this.shopAddress = shopAddress;
         this.businessRegistrationNumber = businessRegistrationNumber;

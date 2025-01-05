@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,6 +49,11 @@ public class CouponBookFileServiceImpl implements CouponBookFileService {
     private final CouponBookFileRepository couponBookFileRepository;
 
     @Override
+    public CouponBookFile selectCouponBookFile(Long id) {
+        return couponBookFileRepository.findById(id).orElse(null);
+    }
+
+    @Override
     public Resource downloadFile(Long fileId) {
         try {
             CouponBookFile fileEntity = couponBookFileRepository.findById(fileId)
@@ -66,7 +72,9 @@ public class CouponBookFileServiceImpl implements CouponBookFileService {
         }
     }
 
+
     @Override
+    @Transactional
     public FileUploadResponse uploadFiles(List<MultipartFile> files) {
 
         try{
@@ -80,7 +88,7 @@ public class CouponBookFileServiceImpl implements CouponBookFileService {
                 // 파일 저장 경로 생성
                 Path uploadPath = Paths.get(rootFilePath)
                         .resolve(fileFolderName)
-                        .resolve(DateCommonUtil.getFormattedDate("yyyymmdd"))
+                        .resolve(DateCommonUtil.getFormattedDate("yyyyMMdd"))
                         .toAbsolutePath()
                         .normalize();
 
@@ -104,7 +112,8 @@ public class CouponBookFileServiceImpl implements CouponBookFileService {
 
             return FileUploadResponse.builder().fileGroupId(newFileGroupId).files(newFiles).build();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error(e);
+            return null;
         }
     }
 
@@ -169,7 +178,7 @@ public class CouponBookFileServiceImpl implements CouponBookFileService {
     public Long getNextFileGroupId() {
         // nextval()을 호출하여 다음 시퀀스 값을 가져옴
         Query query = entityManager.createNativeQuery(
-                "SELECT nextval('group_sequence')"
+                "SELECT nextval('file_group_sequence')"
         );
         return ((Number) query.getSingleResult()).longValue();
     }
@@ -177,7 +186,7 @@ public class CouponBookFileServiceImpl implements CouponBookFileService {
     @Override
     public Long getCurrentValue() {
         Query query = entityManager.createNativeQuery(
-                "SELECT currval('group_sequence')"
+                "SELECT currval('file_group_sequence')"
         );
         return ((Number) query.getSingleResult()).longValue();
     }

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class ShopVo extends CommonColumnVo{
     private String shopAddress;
     private String businessRegistrationNumber;
     private String shopDescription;
+    private CouponBookFileVo couponBookFileVo;
 
     public ShopVo convertToShopVo(Shop shop) {
         ShopVo shopVo = new ShopVo();
