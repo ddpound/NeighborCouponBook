@@ -2,6 +2,7 @@ package com.neighborcouponbook.service.impl;
 
 import com.neighborcouponbook.common.response.FileUploadResponse;
 import com.neighborcouponbook.common.response.ZipResource;
+import com.neighborcouponbook.common.util.AuthUtil;
 import com.neighborcouponbook.common.util.DateCommonUtil;
 import com.neighborcouponbook.model.CouponBookFile;
 import com.neighborcouponbook.model.vo.CouponBookFileVo;
@@ -59,7 +60,7 @@ public class CouponBookFileServiceImpl implements CouponBookFileService {
             CouponBookFile fileEntity = couponBookFileRepository.findById(fileId)
                     .orElseThrow(() -> new FileNotFoundException("File not found with id: " + fileId));
 
-            Path filePath = Paths.get(fileEntity.getPhysicalFilePath()).normalize();
+            Path filePath = Paths.get(fileEntity.getPhysicalFilePath()).resolve(fileEntity.getPhysicalFileName()).normalize();
             Resource resource = new UrlResource(filePath.toUri());
 
             if(!resource.exists()) {
@@ -106,6 +107,8 @@ public class CouponBookFileServiceImpl implements CouponBookFileService {
                 // DB에 파일 정보 저장
                 CouponBookFile fileEntity = new CouponBookFile();
                 fileEntity.initCouponBookFile(newFileGroupId, serialNo++, uniqueFileName, uploadPath.toString(), originalFileName);
+                fileEntity.settingCreateData(AuthUtil.getLoginUserId());
+
                 CouponBookFile couponBookFile = couponBookFileRepository.save(fileEntity);
                 newFiles.add(new CouponBookFileVo().convertToVo(couponBookFile));
             }

@@ -35,6 +35,8 @@ public class CouponBookFileVo extends CommonColumnVo {
         if(!NullChecker.isNull(couponBookFile.getPhysicalFileName())) vo.setPhysicalFileName(couponBookFile.getPhysicalFileName());
         if(!NullChecker.isNull(couponBookFile.getOriginalFileName())) vo.setOriginalFileName(couponBookFile.getOriginalFileName());
 
+        vo.settingCommonColumnVo(couponBookFile);
+
         return vo;
     }
 

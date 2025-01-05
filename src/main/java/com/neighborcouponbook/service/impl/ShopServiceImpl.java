@@ -67,7 +67,6 @@ public class ShopServiceImpl implements ShopService {
                     // file data 는 무조건 하나
                     couponBookFile = couponBookFileService.selectCouponBookFile(fileResponse.getFiles().get(0).getFileId());
                 }
-
             }
 
             Shop shop = new Shop();
@@ -194,7 +193,8 @@ public class ShopServiceImpl implements ShopService {
                             shop.shopName,
                             shop.shopAddress,
                             shop.businessRegistrationNumber,
-                            shop.shopDescription)
+                            shop.shopDescription,
+                            shop.shopThumbnail)
                     .from(shop)
                     .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
                     .join(shop.couponUser, user).on(user.isDeleted.eq(false))
@@ -245,7 +245,8 @@ public class ShopServiceImpl implements ShopService {
                         shop.shopName,
                         shop.shopAddress,
                         shop.businessRegistrationNumber,
-                        shop.shopDescription)
+                        shop.shopDescription,
+                        shop.shopThumbnail)
                 .from(shop)
                 .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
                 .join(shop.couponUser, user).on(user.isDeleted.eq(false))

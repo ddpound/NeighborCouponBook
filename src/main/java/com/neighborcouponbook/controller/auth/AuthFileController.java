@@ -1,7 +1,6 @@
-package com.neighborcouponbook.controller;
+package com.neighborcouponbook.controller.auth;
 
 import com.neighborcouponbook.common.annotation.MenuInformation;
-import com.neighborcouponbook.model.vo.CouponUserVo;
 import com.neighborcouponbook.service.CouponBookFileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,9 +23,9 @@ import java.nio.file.Paths;
 
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping(value = "file")
+@RequestMapping(value = "/auth/file")
 @RestController
-public class FileController {
+public class AuthFileController {
 
     private final CouponBookFileService couponBookFileService;
 
@@ -49,22 +48,12 @@ public class FileController {
                     )
             }
     )
-    @MenuInformation(
-            menuAuthDetail = {
-                    @MenuInformation.MenuRoleDetail(rolesName = "super-admin", roleId = 1),
-                    @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
-            })
     @GetMapping("image/{fileId}")
-    public ResponseEntity<Resource> getShopImage(@PathVariable Long fileId) {
+    public ResponseEntity<Resource> getShopImage(@PathVariable("fileId") Long fileId) {
         try {
-            Resource imageResource = couponBookFileService.downloadFile(fileId);  // fileService로 변경
-
-            // ContentType을 동적으로 결정
-            String contentType = Files.probeContentType(Paths.get(imageResource.getFilename()));
-            MediaType mediaType = MediaType.parseMediaType(contentType);
+            Resource imageResource = couponBookFileService.downloadFile(fileId);
 
             return ResponseEntity.ok()
-                    .contentType(mediaType)
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + imageResource.getFilename() + "\"")
                     .body(imageResource);
         } catch (Exception e) {
