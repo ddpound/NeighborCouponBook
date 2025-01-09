@@ -198,6 +198,7 @@ public class ShopServiceImpl implements ShopService {
                     .from(shop)
                     .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
                     .join(shop.couponUser, user).on(user.isDeleted.eq(false))
+                    .leftJoin(shop.shopThumbnail)
                     .where(
                             shop.couponUser.userId.eq(search.getUserId())
                                     .and(shop.isDeleted.eq(false))
@@ -205,7 +206,7 @@ public class ShopServiceImpl implements ShopService {
                     .fetch();
 
             // 조회 결과가 없으면 null 반환 또는 예외 처리
-            if (results == null) {
+            if (results == null || results.isEmpty()) {
                 throw new RuntimeException("등록한 상점 정보가 없습니다.");
             }
 
@@ -220,7 +221,7 @@ public class ShopServiceImpl implements ShopService {
                             tuple.get(shop.shopAddress),
                             tuple.get(shop.businessRegistrationNumber),
                             tuple.get(shop.shopDescription),
-                            tuple.get(shop.shopThumbnail) != null ? new CouponBookFileVo().convertToVo(tuple.get(shop.shopThumbnail)) : null
+                            tuple.get(shop.shopThumbnail) != null ? new CouponBookFileVo().convertToVo(Objects.requireNonNull(tuple.get(shop.shopThumbnail))) : null
                     ))
                     .collect(Collectors.toList());
 
