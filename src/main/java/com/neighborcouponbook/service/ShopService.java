@@ -19,7 +19,7 @@ public interface ShopService {
     ResponseEntity<?> createShop(ShopVo shopVo, MultipartFile file);
 
     ResponseEntity<?> createShopType(ShopVo shopVo);
-    ResponseEntity<?> updateShop(ShopVo shopVo);
+    ResponseEntity<?> updateShop(ShopVo shopVo, MultipartFile file );
 
     ResponseEntity<?> deleteShop(Long shopId, ShopVo shopVo);
 

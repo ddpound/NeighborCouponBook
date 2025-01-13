@@ -55,7 +55,7 @@ public class Shop extends CommonColumn{
     }
 
     //일단 상점 이름, 업종 등 변경불가
-    public void updateShop(String shopAddress, String businessRegistrationNumber, String shopDescription) {
+    public void updateShop(String shopAddress, String businessRegistrationNumber, String shopDescription, CouponBookFile shopThumbnail) {
         if (shopAddress != null) {
             this.shopAddress = shopAddress;
         }
@@ -64,6 +64,10 @@ public class Shop extends CommonColumn{
         }
         if (shopDescription != null) {
             this.shopDescription = shopDescription;
+        }
+
+        if(shopThumbnail != null) {
+            this.shopThumbnail = shopThumbnail;
         }
     }
 

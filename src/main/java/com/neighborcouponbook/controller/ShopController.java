@@ -72,8 +72,22 @@ public class ShopController {
             summary = "가게업데이트",
             description = "가게 데이터를 업데이트를 합니다",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(schema = @Schema(implementation = ShopVo.class))
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                                    schema = @Schema(type = "object"),
+                                    encoding = {
+                                            @Encoding(
+                                                    name = "file",
+                                                    contentType = "image/jpeg, image/png"
+                                            ),
+                                            @Encoding(
+                                                    name = "data",
+                                                    contentType = "application/json"
+                                            )
+                                    }
+                            )
+                    }
             ),
             responses = {
                     @ApiResponse(
@@ -88,9 +102,15 @@ public class ShopController {
                     @MenuInformation.MenuRoleDetail(rolesName = "super-admin", roleId = 1),
                     @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
             })
-    @PutMapping(value = "update")
-    public ResponseEntity<?> updateShop(@RequestBody ShopVo shopVo) {
-        return shopService.updateShop(shopVo);
+    @PostMapping(value = "update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<?> updateShop(@ModelAttribute ShopVo shopVo,
+                                        @RequestPart(value = "file" , required = false) MultipartFile file) {
+        try {
+            return shopService.updateShop(shopVo, file);
+        }catch (Exception e) {
+            log.error(e);
+            return ResponseUtil.createErrorResponse("서버 에러가 발생했습니다.");
+        }
     }
 
     @PostMapping(value = "delete")

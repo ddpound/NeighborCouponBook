@@ -146,15 +146,32 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     @Transactional
-    public ResponseEntity<?> updateShop(ShopVo shopVo) {
+    public ResponseEntity<?> updateShop(ShopVo shopVo, MultipartFile file) {
         try {
             Shop updatedShopInfo = shopRepository.findById(shopVo.getShopId())
                     .orElseThrow(() -> new IllegalArgumentException("상점 정보가 존재하지 않습니다."));
 
-            updatedShopInfo.updateShop(shopVo.getShopAddress(), shopVo.getBusinessRegistrationNumber(), shopVo.getShopDescription());
+            CouponBookFile couponBookFile = null;
+
+            if(file != null && !file.isEmpty()){
+                List<MultipartFile> files = new ArrayList<>();
+                files.add(file);
+                FileUploadResponse fileResponse = couponBookFileService.uploadFiles(files);
+
+                if(fileResponse != null && fileResponse.getFiles() != null && !fileResponse.getFiles().isEmpty()){
+                    // file data 는 무조건 하나
+                    couponBookFile = couponBookFileService.selectCouponBookFile(fileResponse.getFiles().get(0).getFileId());
+                }
+            }
+
+            updatedShopInfo.updateShop(shopVo.getShopAddress(),
+                    shopVo.getBusinessRegistrationNumber(),
+                    shopVo.getShopDescription(),
+                    couponBookFile);
+
             updatedShopInfo.updateData(AuthUtil.getLoginUserData().getUserId());
 
-            //트랜잭션이 끝날 때 변경감지로 update
+            // 트랜잭션이 끝날 때 변경감지로 update2
             return ResponseUtil.createSuccessResponse(1, "수정이 완료되었습니다.");
         } catch (Exception e) {
             log.error("Shop update failed : ", e);
@@ -184,21 +201,12 @@ public class ShopServiceImpl implements ShopService {
             QShopType shopType = QShopType.shopType;
             QCouponUser user = QCouponUser.couponUser;
 
-            List<Tuple> results = queryFactory
-                    .select(shop.shopId,
-                            shop.couponUser.userId,
-                            user.userName,
-                            shop.shopType.shopTypeId,
-                            shopType.shopTypeName,
-                            shop.shopName,
-                            shop.shopAddress,
-                            shop.businessRegistrationNumber,
-                            shop.shopDescription,
-                            shop.shopThumbnail)
+            List<Shop> results = queryFactory
+                    .select(shop)
                     .from(shop)
-                    .join(shop.shopType, shopType).on(shopType.isDeleted.eq(false))
-                    .join(shop.couponUser, user).on(user.isDeleted.eq(false))
-                    .leftJoin(shop.shopThumbnail)
+                    .join(shop.shopType, shopType).fetchJoin()
+                    .join(shop.couponUser, user).fetchJoin()
+                    .leftJoin(shop.shopThumbnail).fetchJoin()
                     .where(
                             shop.couponUser.userId.eq(search.getUserId())
                                     .and(shop.isDeleted.eq(false))
@@ -210,22 +218,18 @@ public class ShopServiceImpl implements ShopService {
                 throw new RuntimeException("등록한 상점 정보가 없습니다.");
             }
 
-            return results.stream()
-                    .map(tuple -> new ShopVo(
-                            tuple.get(shop.shopId),
-                            tuple.get(shop.couponUser.userId),
-                            tuple.get(user.userName),
-                            tuple.get(shop.shopType.shopTypeId),
-                            tuple.get(shopType.shopTypeName),
-                            tuple.get(shop.shopName),
-                            tuple.get(shop.shopAddress),
-                            tuple.get(shop.businessRegistrationNumber),
-                            tuple.get(shop.shopDescription),
-                            tuple.get(shop.shopThumbnail) != null ? new CouponBookFileVo().convertToVo(Objects.requireNonNull(tuple.get(shop.shopThumbnail))) : null
-                    ))
-                    .collect(Collectors.toList());
+            List<ShopVo> resultList = new ArrayList<>();
+            // 컨버트용 vo
+            ShopVo convertVo = new ShopVo();
+            for (Shop shopItem : results) {
+                log.info(shopItem.toString());
+                resultList.add(convertVo.convertToShopVo(Objects.requireNonNull(shopItem)));
+            }
+
+            return resultList;
 
         } catch (Exception e) {
+            log.error("selectShopList ERROR : {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -272,7 +276,8 @@ public class ShopServiceImpl implements ShopService {
                 shopVo.get(shop.shopAddress),
                 shopVo.get(shop.businessRegistrationNumber),
                 shopVo.get(shop.shopDescription),
-                shopVo.get(shop.shopThumbnail) != null ? new CouponBookFileVo().convertToVo(shopVo.get(shop.shopThumbnail)) : null
+                shopVo.get(shop.shopThumbnail) != null ? new CouponBookFileVo().convertToVo(shopVo.get(shop.shopThumbnail)) : null,
+                shopVo.get(shop.couponUser) != null ? new CouponUserVo().convertToVo(shopVo.get(shop.couponUser)) : null
                 );
     }
 }

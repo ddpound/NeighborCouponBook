@@ -27,6 +27,7 @@ public class ShopVo extends CommonColumnVo{
     private String businessRegistrationNumber;
     private String shopDescription;
     private CouponBookFileVo couponBookFileVo;
+    private CouponUserVo couponUserVo;
 
     public ShopVo convertToShopVo(Shop shop) {
         ShopVo shopVo = new ShopVo();
@@ -37,6 +38,11 @@ public class ShopVo extends CommonColumnVo{
         if(!NullChecker.isNullString(shop.getBusinessRegistrationNumber())) shopVo.setBusinessRegistrationNumber(shop.getBusinessRegistrationNumber());
         if(!NullChecker.isNullString(shop.getShopDescription())) shopVo.setShopDescription(shop.getShopDescription());
 
+        if(!NullChecker.isNull(shop.getCouponUser())) shopVo.setCouponUserVo(new CouponUserVo().convertToVo(shop.getCouponUser()));
+        if(!NullChecker.isNull(shop.getShopType())) shopVo.setShopTypeId(shop.getShopType().getShopTypeId());
+        if(!NullChecker.isNull(shop.getShopThumbnail())) shopVo.setCouponBookFileVo(new CouponBookFileVo().convertToVo(shop.getShopThumbnail()));
+
+        // 공통 요소들
         if(!NullChecker.isNull(shop.returnAllCommonColumn())) shopVo.settingCommonColumnVo(shop.returnAllCommonColumn());
 
         return shopVo;
