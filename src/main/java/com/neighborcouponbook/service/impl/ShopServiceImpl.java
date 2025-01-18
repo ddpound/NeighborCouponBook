@@ -17,6 +17,7 @@ import com.neighborcouponbook.repository.ShopTypeRepository;
 import com.neighborcouponbook.service.CouponBookFileService;
 import com.neighborcouponbook.service.CouponUserService;
 import com.neighborcouponbook.service.ShopService;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.neighborcouponbook.model.QShop.shop;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -206,10 +209,10 @@ public class ShopServiceImpl implements ShopService {
                     .from(shop)
                     .join(shop.shopType, shopType).fetchJoin()
                     .join(shop.couponUser, user).fetchJoin()
-                    .leftJoin(shop.shopThumbnail).fetchJoin()
-                    .where(
-                            shop.couponUser.userId.eq(search.getUserId())
-                                    .and(shop.isDeleted.eq(false))
+                    .where(shop.isDeleted.eq(false).and(
+                            // 다양한 검색 조건에 따라 동적 조건 생성
+                            createSearchCondition(search)
+                            )
                     )
                     .fetch();
 
@@ -232,6 +235,21 @@ public class ShopServiceImpl implements ShopService {
             log.error("selectShopList ERROR : {}", e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    private BooleanBuilder createSearchCondition(ShopSearch search) {
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (search.getUserId() != null) {
+            builder.or(shop.couponUser.userId.eq(search.getUserId()));
+        }
+        if (search.getShopId() != null) {
+            builder.or(shop.shopId.eq(search.getShopId()));
+        }
+        if (search.getShopName() != null) {
+            builder.or(shop.shopName.like("%" + search.getShopName() + "%"));
+        }
+        return builder;
     }
 
     @Override
