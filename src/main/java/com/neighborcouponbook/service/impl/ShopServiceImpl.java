@@ -241,13 +241,13 @@ public class ShopServiceImpl implements ShopService {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (search.getUserId() != null) {
-            builder.or(shop.couponUser.userId.eq(search.getUserId()));
+            builder.and(shop.couponUser.userId.eq(search.getUserId()));
         }
         if (search.getShopId() != null) {
-            builder.or(shop.shopId.eq(search.getShopId()));
+            builder.and(shop.shopId.eq(search.getShopId()));
         }
         if (search.getShopName() != null) {
-            builder.or(shop.shopName.like("%" + search.getShopName() + "%"));
+            builder.and(shop.shopName.like("%" + search.getShopName() + "%"));
         }
         return builder;
     }
