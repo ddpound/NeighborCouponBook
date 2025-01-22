@@ -7,10 +7,7 @@ import com.neighborcouponbook.model.search.CouponUserSearch;
 import com.neighborcouponbook.model.search.RoleSearch;
 import com.neighborcouponbook.model.search.UserRoleSearch;
 import com.neighborcouponbook.model.vo.*;
-import com.neighborcouponbook.repository.CouponUserRepository;
-import com.neighborcouponbook.repository.ShopRepository;
-import com.neighborcouponbook.repository.ShopTypeRepository;
-import com.neighborcouponbook.repository.UserRoleRepository;
+import com.neighborcouponbook.repository.*;
 import com.neighborcouponbook.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -36,10 +33,10 @@ import java.util.Set;
 @Component
 public class InitSystem implements CommandLineRunner {
 
-    private final UserRoleRepository userRoleRepository;
     private final CouponUserRepository couponUserRepository;
     private final ShopRepository shopRepository;
     private final ShopTypeRepository shopTypeRepository;
+    private final BoardRepository boardRepository;
 
     @Value("${admin-setting.super-admin-id}")
     private Long superAdminId;
@@ -88,6 +85,8 @@ public class InitSystem implements CommandLineRunner {
             createBaseMenuList();
 
             createDefaultShop();
+
+            createTestBoard();
         }
 
 
@@ -290,5 +289,28 @@ public class InitSystem implements CommandLineRunner {
                 });
             }
         });
+    }
+
+    public void createTestBoard() {
+        int boardCnt = boardRepository.countByIsDeleted(false);
+
+        if(boardCnt < 1) {
+            Board board = new Board();
+            board.settingCreateData(superAdminId);
+
+            CouponUser user = couponUserRepository.findById(1L)
+                    .orElseThrow(() -> new IllegalArgumentException("error finding user"));
+
+            board.createBoard(
+                    "001",
+                    "테스트 공지 제목입니다.",
+                    "테스트 공지 내용입니다."
+            );
+            board.writeDbRemarks("초기데이터");
+
+            boardRepository.save(board);
+        }
+
+
     }
 }

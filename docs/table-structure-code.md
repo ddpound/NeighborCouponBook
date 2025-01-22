@@ -138,6 +138,13 @@ Table coupon_book_file{
   original_file_name varchar // 저장했었던 이름.
 }
 
+Table board {
+  board_id integer
+  board_type varchar
+  board_title varchar
+  board_content varchar
+}
+
 Ref: posts.user_id > coupon_user.user_id // many-to-one
 
 Ref: coupon_user.user_id < follows.following_user_id
