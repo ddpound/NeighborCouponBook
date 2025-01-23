@@ -110,7 +110,7 @@ public class BoardServiceImpl implements BoardService {
 
             updateBoardInfo.updateBoard(boardVo.getBoardTitle(),
                     boardVo.getBoardContent());
-            System.out.println("TEST>>"+AuthUtil.getLoginUserData().getUserId());
+
             updateBoardInfo.updateData(AuthUtil.getLoginUserData().getUserId());
 
             return ResponseUtil.createSuccessResponse(1, "수정이 완료되었습니다.");
@@ -122,9 +122,9 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional
-    public ResponseEntity<?> deleteBoard(BoardVo boardVo) {
+    public ResponseEntity<?> deleteBoard(Long boardId) {
         try {
-            Board softDeleteBoardInfo = boardRepository.findById(boardVo.getBoardId())
+            Board softDeleteBoardInfo = boardRepository.findById(boardId)
                     .orElseThrow(() -> new IllegalArgumentException("게시글 정보가 존재하지 않습니다"));
             softDeleteBoardInfo.softDeleteData(AuthUtil.getLoginUserData().getUserId());
 

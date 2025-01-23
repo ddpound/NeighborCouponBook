@@ -182,9 +182,9 @@ public class BoardController {
                     @MenuInformation.MenuRoleDetail(rolesName = "user", roleId = 2)
             })
     @PostMapping("delete")
-    public ResponseEntity<?> deleteBoard(@RequestBody BoardVo boardVo) {
+    public ResponseEntity<?> deleteBoard(@RequestParam Long boardId) {
         try {
-            return boardService.deleteBoard(boardVo);
+            return boardService.deleteBoard(boardId);
         } catch (Exception e) {
             log.error(e);
             return ResponseUtil.createErrorResponse("서버 에러가 발생했습니다.");
